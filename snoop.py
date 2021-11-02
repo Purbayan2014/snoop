@@ -43,7 +43,7 @@ print ("""\033[36m
 \___ \  __ \   _ \   _ \  __ \  
       | |   | (   | (   | |   | 
 _____/ _|  _|\___/ \___/  .__/  
-                         _|    \033[0m \033[37mv1.3.0A\033[34;1m_rus_\033[31;1mSource Demo_Termux\033[0m
+                         _|    \033[0m \033[37mv1.3.0B\033[34;1m_rus_\033[31;1mSource Demo_Termux\033[0m
 """)
 
 print (Fore.CYAN + "#Примеры:" + Style.RESET_ALL)
@@ -55,15 +55,16 @@ console.rule(characters = '=', style="cyan")
 print("")
 
 module_name = (Fore.CYAN + "Snoop: поиск никнейма по всем фронтам!" + Style.RESET_ALL)
-version = "v1.3.0A_rus Snoop_termux (Source demo)"
+version = "v1.3.0B_rus Snoop_termux (Source demo)"
 
 dirresults = os.getcwd()
 dirhome = os.environ['HOME'] if sys.platform != 'win32' else "c:"
 timestart = time.time()
 time_data = time.localtime()
 censors = 1
+censors_timeout = 1
 recensor = 0
-czr=5
+czr=4
 
 # date +%s конвертер
 e_mail = 'Demo: snoopproject@protonmail.com'
@@ -218,6 +219,8 @@ def get_response(request_future, error_type, social_network, print_found_only=Fa
         if print_found_only==False:
             print_error(err2, "Ошибка соединения:", social_network, verbose, color)
     except requests.exceptions.Timeout as err3:
+        global censors_timeout
+        censors_timeout +=1
         if print_found_only==False:
             print_error(err3, "Timeout ошибка:", social_network, verbose, color)
     except requests.exceptions.RequestException as err4:
@@ -755,7 +758,7 @@ border_style="bold blue"))# ,style="bold green"))
     search_group.add_argument("username", nargs='+', metavar='nickname', action="store",
                               help="\033[36mН\033[0mикнейм разыскиваемого пользователя. \
                               Поддерживается поиск одновременно нескольких имён.\
-                              Ник, содеражащий в своем имени пробел, заключается в кавычки"
+                              Ник, содержащий в своем имени пробел, заключается в кавычки"
                              )
     search_group.add_argument("--verbose", "-v", action="store_true", dest="verbose", default=False,
                               help="\033[36mВ\033[0mо время поиска 'username' выводить на печать подробную вербализацию"
@@ -764,7 +767,7 @@ border_style="bold blue"))# ,style="bold green"))
                               help="\033[36mУ\033[0mказать для поиска 'username' другую БД (Локально)/В demo version функция отключена"
                              )
     search_group.add_argument("--web-base", "-w", action="store_true", dest="web", default=False,
-                              help="\033[36mП\033[0mодключиться для поиска 'username' к обновляемой web_БД (Online)/\
+                              help="\033[36mП\033[0mодключиться для поиска 'username' к обновляемой web_БД (Онлайн)/\
                               В demo version функция отключена"
                              )
     search_group.add_argument("--site", "-s chess", action="append", metavar='', dest="site_list",  default=None,
@@ -1308,6 +1311,7 @@ IPv4/v6; GEO-координаты/ссылки; локации; провайде
                 file_csv = open("results/csv/" + "username" + time.strftime("%d_%m_%Y_%H_%M_%S", time_data) + ".csv", "w", newline='', encoding="utf-8")
             usernamCSV = re.sub(" ", "_", username)
             censor = int((censors - recensor)/kef_user)
+            flagBS_err = round((censor+censors_timeout-2)*100/flagBS, 3)
             czr_csv = ''
             if censor >= czr:
                 czr_csv = 'Внимание!_Поиск_проходил_при_нестабильном_интернет_соединении_или_Internet-Censorship. Результаты_могут_быть_неполные.'
@@ -1342,8 +1346,7 @@ IPv4/v6; GEO-координаты/ссылки; локации; провайде
                                  FULL[site]['response_time_site_ms'],
                                  FULL[site]['check_time_ms'],
                                  FULL[site]['response_time_ms'],
-                                 Ssession
-                                 ])
+                                 Ssession])
             writer.writerow(['«---------------------------------------',
                              '--------','----', '----------------------------------',
                              '--------------------------------------------------------',
@@ -1360,12 +1363,12 @@ IPv4/v6; GEO-координаты/ссылки; локации; провайде
         print(Fore.CYAN + "├──Результаты сохранены в: " + Style.RESET_ALL + dirresults + "/results/*/" + str(username) + ".*")
         if censor >= czr:
             print(Fore.CYAN + "├───Дата поискового запроса:", time.strftime("%d/%m/%Y_%H:%M:%S", time_data))
-            print(Fore.CYAN + "└────\033[31;1mВнимание!\033[0m", Fore.CYAN + "Нестабильное соединение или Internet Censorship:",
-            "*используйте VPN\n")
+            print(Fore.CYAN + f"└────\033[31;1mВнимание! Bad_raw: {flagBS_err}% БД\033[0m")
+            print(Fore.CYAN + "     └─нестабильное соединение или Internet Censorship")
+            print("       \033[36m└─используйте \033[36;1mVPN\033[0m \033[36mили увеличьте значение '\033[36;1m-t\033[0m\033[36m'\033[0m\n")
         else:
             print(Fore.CYAN + "└───Дата поискового запроса:", time.strftime("%d/%m/%Y_%H:%M:%S", time_data), "\n")
         console.print(Panel(f"{e_mail} до {Do}",title=license, style=STL(color="white", bgcolor="blue")))
-
 # Музыка.
         try:
             if args.no_func==False:
