@@ -354,10 +354,10 @@ def snoop(username, site_data, verbose=False, norm=False, reports=False, user=Fa
             results_site["url_user"] = ""
             results_site['countryCSV'] = ""
             results_site['http_status'] = ""
+            results_site['session_size'] = ""
             results_site['check_time_ms'] = ""
             results_site['response_time_ms'] = ""
             results_site['response_time_site_ms'] = ""
-            results_site['session_size'] = ""
         else:
 # URL пользователя на сайте (если он существует).
 #            global url
@@ -1347,11 +1347,7 @@ IPv4/v6; GEO-координаты/ссылки; локации; провайде
                                  FULL[site]['check_time_ms'],
                                  FULL[site]['response_time_ms'],
                                  Ssession])
-            writer.writerow(['«---------------------------------------',
-                             '--------','----', '----------------------------------',
-                             '--------------------------------------------------------',
-                             '-------------', '-----------------', '--------------------------------',
-                             '-------------', '-----------------------»'])
+            writer.writerow(['«' + "-"*39, '-'*8, '-'*4, '-'*35, '-'*56, '-'*13, '-'*17, '-'*32,'-'*13, '-'*23, '-'*16 + '»'])
             writer.writerow(['База_Snoop(DemoVersion)=' + str(flagBS) + '_Websites'])
             writer.writerow('')
             writer.writerow(['Дата'])
