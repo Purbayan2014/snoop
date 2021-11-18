@@ -597,7 +597,6 @@ def snoop(username, site_data, verbose=False, norm=False, reports=False, user=Fa
 ## Сохранить сущ.флаги.
             results_site['exists'] = exists
             results_site['session_size'] = session_size
-# Сохранить результаты из запроса.
             results_site['countryCSV'] = countryB
             results_site['http_status'] = http_status
             results_site['check_time_ms'] = time_site
@@ -1196,12 +1195,12 @@ IPv4/v6; GEO-координаты/ссылки; локации; провайде
 # Создать для проверки сокращенную базу данных сайта(ов).
 # Создать и добавить в новую БД сайты, аргументы (-e) которых != бук.кодам стран (country_klas).
     elif args.exclude_country is not None:
-        one_exl(args.exclude_country, True)
+        one_exl(args.exclude_country, bool_=True)
 ## Опция '-o'.
 # Создать для проверки сокращенную базу данных сайта(ов).
 # Создать и добавить в новую БД сайты, аргументы (-e) которых != бук.кодам стран (country_klas).
     elif args.one_level is not None:
-        one_exl(args.one_level, False)
+        one_exl(args.one_level, bool_=False)
 
 ## Крутим user's.
     def starts(SQ):
