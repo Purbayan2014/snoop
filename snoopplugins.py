@@ -23,15 +23,11 @@ from colorama import Fore, Style, init
 from concurrent.futures import ProcessPoolExecutor, ThreadPoolExecutor
 from requests.adapters import HTTPAdapter
 from requests_futures.sessions import FuturesSession
-try:
-    from rich.console import Console
-    from rich.progress import (track,BarColumn,TimeRemainingColumn,SpinnerColumn,TimeElapsedColumn,Progress)
-    from rich.table import Table
-    from rich.panel import Panel
-    from rich.style import Style as STL
-except:
-    print("Обновите lib python:\n'cd ~/snoop && python3 -m pip install -r requirements.txt'")
-    sys.exit(0)
+from rich.console import Console
+from rich.progress import (track,BarColumn,TimeRemainingColumn,SpinnerColumn,TimeElapsedColumn,Progress)
+from rich.table import Table
+from rich.panel import Panel
+from rich.style import Style as STL
 from urllib.parse import urlparse
 
 if sys.platform == 'win32':
@@ -442,7 +438,7 @@ https://example.org/fo/bar/7564
 Примеры для чего можно использовать модуль GEO_IP/domain от Snoop Project.
 Например, если у пользователя имеется список ip адресов от DDoS атаки,
 он может проанализировать откуда исходила  max/min атака и от кого (провайдеры).
-Решая квесты-CTF, где используются GPS/IPv4/v6. 
+Решая квесты-CTF, где используются GPS/IPv4/v6.
 В конечном итоге юзать плагин в образовательных целях или из естественного любопытства (проверить любые ip-адреса и их принадлежность к провайдеру и местности).\033[0m""")
                 helpend()
 
