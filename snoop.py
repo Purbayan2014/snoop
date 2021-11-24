@@ -526,7 +526,7 @@ def snoop(username, BDdemo_new, verbose=False, norm=False, reports=False, user=F
 ## Считать тайминги приближенно.
             ello = float(time.time() - timestart)
             li_time.append(ello)
-            dif_time = []
+            dif_time = [0]
 
 ## Считать тайминги с повышенной точностью.
             try:
@@ -539,46 +539,41 @@ def snoop(username, BDdemo_new, verbose=False, norm=False, reports=False, user=F
                 i
                 for i1 in (li_time[-1:]):
                     i1
-                dif = (i1-i)
-                dif_time.append(dif)
+                dif_time[0] = (i1-i)
 
 ## Опция '-v'.
-                if verbose == True:
-                    if session_size == 0 or session_size is None:
-                        Ssession_size = "Head"
-                    elif session_size == "Err":
-                        Ssession_size = "Нет"
-                    else:
-                        Ssession_size = str(round(session_size/1024)) + " Kb"
+            if verbose == True:
+                if session_size == 0 or session_size is None:
+                    Ssession_size = "Head"
+                elif session_size == "Err":
+                    Ssession_size = "Нет"
+                else:
+                    Ssession_size = str(round(session_size/1024)) + " Kb"
 
-                    time_ello=("%.0f" % float(ello*1000))
-                    if color == True:
-                        if dif > 5: #задержка в общем времени
-                            console.print(f"[cyan][*{time_site} ms T] >", f"[bold red][*{time_ello} ms t]", f"[cyan][*{Ssession_size}]")
-                            console.rule("", style="bold red")
-                        else:
-                            console.print(f"[cyan][*{time_site} ms T] >", f"[cyan][*{time_ello} ms t]", f"[cyan][*{Ssession_size}]")
-                            console.rule("", style="bold blue")
+                time_ello=("%.0f" % float(ello*1000))
+                if color == True:
+                    if dif_time[0] > 5: #задержка в общем времени
+                        console.print(f"[cyan][*{time_site} ms T] -->", f"[bold red][*{time_ello} ms t]", f"[cyan][*{Ssession_size}]")
+                        console.rule("", style="bold red")
                     else:
-                        console.print(f"[*{time_site} ms T] >", f"[*{time_ello} ms t]", f"[*{Ssession_size}]", highlight=False)
-                        console.rule(style="color")
+                        console.print(f"[cyan][*{time_site} ms T] -->", f"[cyan][*{time_ello} ms t]", f"[cyan][*{Ssession_size}]")
+                        console.rule("", style="bold blue")
+                else:
+                    console.print(f"[*{time_site} ms T] -->", f"[*{time_ello} ms t]", f"[*{Ssession_size}]", highlight=False)
+                    console.rule(style="color")
 
 ## Служебная информация для CSV.
-            response_time_site_ms = 0
-            for response_time_site_ms in dif_time:
-                response_time_site_ms
-
-## Сохранить сущ.флаги.
+            if dif_time[0] * 1000 < 250:
+                results_site['response_time_site_ms'] = "нет"
+            else:
+                results_site['response_time_site_ms'] = round(float(dif_time[0] * 1000))
             results_site['exists'] = exists
             results_site['session_size'] = session_size
             results_site['countryCSV'] = countryB
             results_site['http_status'] = http_status
             results_site['check_time_ms'] = time_site
-            results_site['response_time_ms'] = round(float(ello*1000))
-            if response_time_site_ms*1000 < 250:
-                results_site['response_time_site_ms'] = "нет"
-            else:
-                results_site['response_time_site_ms'] = round(float(response_time_site_ms*1000))
+            results_site['response_time_ms'] = round(float(ello * 1000))
+
 ## Добавление результатов этого сайта в окончательный словарь со всеми другими результатами.
             dic_snoop_full[websites_names] = results_site
 # Вернуть словарь со всеми данными.
@@ -630,22 +625,10 @@ def autoclean():
     except:
         console.log("[red]Ошибка")
 
-### ОСНОВА.
-def run():
-## Лицензия.
-    with open('COPYRIGHT', 'r', encoding="utf8") as copyright:
-        cop = copyright.read()
-
-    version_snoop = f"\033[37m{cop}\033[0m\n" + \
-                    f"\033[36mSnoop: {platform.architecture(executable=sys.executable, bits='', linkage='')}\033[36m\n" + \
-                    f"\033[36mSource: {version}\033[36m\n" +  \
-                    f"\033[36mOS: {platform.platform(aliased=True, terse=0)}\033[36m\n" + \
-                    f"\033[36mPython: {platform.python_version()}\033[36m\n\n"
-
 ## Пожертвование.
-    def donate():
-        print("")
-        console.print(Panel("""[cyan]
+def donate():
+    print("")
+    console.print(Panel("""[cyan]
 ╭donate/Buy:
 ├──Яндекс.Деньги (Юmoney):: [white]4100111364257544[/white]
 ├──Visa:: [white]4274320047338002[/white]
@@ -664,9 +647,8 @@ def run():
 Snoop Full Version готовой сборки то есть исполняемого файла,
 для Windows — это 'snoop.exe', для GNU/Linux — 'snoop'.
 
-Snoop в исполняемом виде (бинарник) предоставляется по лицензии, с которой пользователь
-должен ознакомиться перед покупкой ПО. Лицензия (RU/EN) для Snoop Project в
-исполняемом виде находится в rar-архивах демо версий Snoop по ссылке[/bold green]
+Snoop в исполняемом виде (бинарник) предоставляется по лицензии, с которой пользователь должен ознакомиться перед покупкой ПО.
+Лицензия (RU/EN) для Snoop Project в исполняемом виде находится в rar-архивах демо версий Snoop по ссылке: [/bold green]
 [cyan]https://github.com/snooppr/snoop/releases[/cyan][bold green], а так же лицензия доступна по команде '[/bold green][cyan]snoop -V[/cyan][bold green]' или '[/bold green][cyan]snoop.exe -V[/cyan][bold green]' у исполняемого файла.
 
 Если Snoop требуется вам для служебных или образовательных задач,
@@ -683,22 +665,21 @@ Snoop Full Version: плагины без ограничений; 2200+ Websites
 [bold green]Email:[/bold green] [cyan]snoopproject@protonmail.com[/cyan]
 [bold green]Исходный код:[/bold green] [cyan]https://github.com/snooppr/snoop[/cyan]""", title="[bold red]Demo: (Публичная оферта)",
 border_style="bold blue"))# ,style="bold green"))
-        webbrowser.open("https://sobe.ru/na/snoop_project_2020")
-        print(Style.BRIGHT + Fore.RED + "Выход")
-        sys.exit()
+    webbrowser.open("https://sobe.ru/na/snoop_project_2020")
+    print(Style.BRIGHT + Fore.RED + "Выход")
+    sys.exit()
 
-## Функция валидатор: выбор/искл регионов для поиска.
-    def onelevel_or_exclude(exl_onelevel):
-        lap = []
-        bd_flag = []
-        for k,v in BDdemo.items():
-            bd_flag.append(v.get('country_klas').lower())
+### ОСНОВА.
+def run():
+## Лицензия.
+    with open('COPYRIGHT', 'r', encoding="utf8") as copyright:
+        cop = copyright.read()
 
-        enter_coun_u=[x.lower() for x in exl_onelevel]
-        lap=list(set(bd_flag) & set(enter_coun_u))
-        diff_list=list(set(enter_coun_u) - set(bd_flag)) # вывести уникальные элементы только из enter_coun_u иначе set(enter_coun_u)^set(bd_flag)
-# Вернуть корректный и bad списки пользовательского ввода в cli.
-        return lap, diff_list
+    version_snoop = f"\033[37m{cop}\033[0m\n" + \
+                    f"\033[36mSnoop: {platform.architecture(executable=sys.executable, bits='', linkage='')}\033[36m\n" + \
+                    f"\033[36mSource: {version}\033[36m\n" +  \
+                    f"\033[36mOS: {platform.platform(aliased=True, terse=0)}\033[36m\n" + \
+                    f"\033[36mPython: {platform.python_version()}\033[36m\n\n"
 
 ## Назначение опций Snoop.
     parser = ArgumentParser(formatter_class = RawDescriptionHelpFormatter,
@@ -1037,10 +1018,7 @@ IPv4/v6; GEO-координаты/ссылки; локации; провайде
             my_list_bad = list(errspec.read())
         try:
             patchuserlist = ("{}".format(args.user))
-            if sys.platform != 'win32':
-                userfile=patchuserlist.split('/')[-1]
-            else:
-                userfile=patchuserlist.split('\\')[-1]
+            userfile = patchuserlist.split('/')[-1] if sys.platform != 'win32' else patchuserlist.split('\\')[-1]
             with open(patchuserlist, "r", encoding="utf8") as u1:
                 userlist=[line.strip() for line in u1.read().splitlines()]
                 for i in userlist:
@@ -1050,8 +1028,7 @@ IPv4/v6; GEO-координаты/ссылки; локации; провайде
                     elif any(' ' in i for i in i):
                         g1=i.split()
                         g11 = " ".join(g1)
-                        if g11 not in userlist:
-                            userlists.append(g11)
+                        userlists.append(g11) if g11 not in userlist else ""
                     elif i == "":
                         continue
                     else:
@@ -1089,22 +1066,26 @@ IPv4/v6; GEO-координаты/ссылки; локации; провайде
         sort_web_BDdemo_new = {}
         for site in country_sites:
             sort_web_BDdemo_new[site] = BDdemo.get(site)
-## Опция  '-w' не активна.
-    try:
-        if args.web == False:
-            print(Fore.CYAN + f"\nзагружена локальная база: " +
-            Style.BRIGHT + Fore.CYAN + f"{len(BDdemo)}" + "_Websites" + Style.RESET_ALL)
-    except:
-        print("\033[31;1mInvalid загружаемая база данных.\033[0m")
 
 ## Функция для опций '-eo'
-    def one_exl(one_exl, bool_):
+    def one_exl(one_exl_, bool_):
+        lap = []
+        bd_flag = []
+
         for k,v in BDdemo.items():
-            if all(item.lower() != v.get('country_klas').lower() for item in one_exl) == bool_:
+            bd_flag.append(v.get('country_klas').lower())
+            if all(item.lower() != v.get('country_klas').lower() for item in one_exl_) == bool_:
                 BDdemo_new[k] = v
+
+        enter_coun_u=[x.lower() for x in one_exl_]
+        lap=list(set(bd_flag) & set(enter_coun_u))
+        diff_list=list(set(enter_coun_u) - set(bd_flag)) # вывести уникальные элементы только из enter_coun_u иначе set(enter_coun_u)^set(bd_flag)
+
         if bool(BDdemo_new) == False:
             print(f"\033[31;1m[{str(diff_list).strip('[]')}] Все регионы поиска являются невалидными.\033[0m")
             sys.exit()
+# Вернуть корректный и bad списки пользовательского ввода в cli.
+        return lap, diff_list
 
 ## Если опции '-seo' не указаны, то используем БД, как есть.
     BDdemo_new = {}
@@ -1131,11 +1112,12 @@ IPv4/v6; GEO-координаты/ссылки; локации; провайде
 ## Отмена поиска, если нет ни одного совпадения по БД и '-s'.
         if not BDdemo_new:
             sys.exit()
+
 ## Опция '-e'.
 # Создать для проверки сокращенную базу данных сайта(ов).
 # Создать и добавить в новую БД сайты, аргументы (-e) которых != бук.кодам стран (country_klas).
     elif args.exclude_country is not None:
-        lap, diff_list = onelevel_or_exclude(args.exclude_country)
+        lap, diff_list = one_exl(one_exl_ = args.exclude_country, bool_=True)
 
         print(Fore.CYAN + f"[+] активирована опция '-e': «исключить из поиска выбранные регионы»::", end=' ')
         print(Style.BRIGHT + Fore.CYAN + str(lap).strip('[]').upper() + Style.RESET_ALL + " " + Style.BRIGHT + Fore.RED + \
@@ -1143,12 +1125,11 @@ IPv4/v6; GEO-координаты/ссылки; локации; провайде
         "    допустимо использовать опцию '-e' несколько раз\n"
         "    [опция '-e'] несовместима с [опциями '-s', '-c', 'o']")
 
-        one_exl(args.exclude_country, bool_=True)
 ## Опция '-o'.
 # Создать для проверки сокращенную базу данных сайта(ов).
 # Создать и добавить в новую БД сайты, аргументы (-e) которых != бук.кодам стран (country_klas).
     elif args.one_level is not None:
-        lap, diff_list = onelevel_or_exclude(args.one_level)
+        lap, diff_list = one_exl(one_exl_ = args.one_level, bool_=False)
 
         print(Fore.CYAN + f"[+] активирована опция '-o': «включить в поиск только выбранные регионы»::", end=' ')
         print(Style.BRIGHT + Fore.CYAN + str(lap).strip('[]').upper() + Style.RESET_ALL + " " + Style.BRIGHT + Fore.RED + \
@@ -1156,14 +1137,18 @@ IPv4/v6; GEO-координаты/ссылки; локации; провайде
         "    допустимо использовать опцию '-o' несколько раз\n"
         "    [опция '-o'] несовместима с [опциями '-s', '-c', 'e']")
 
-        one_exl(args.one_level, bool_=False)
-
+## Опция  '-w' не активна.
+    try:
+        if args.web == False:
+            print(Fore.CYAN + f"\nзагружена локальная база: " +
+            Style.BRIGHT + Fore.CYAN + f"{len(BDdemo)}" + "_Websites" + Style.RESET_ALL)
+    except:
+        print("\033[31;1mInvalid загружаемая база данных.\033[0m")
 
 ## Крутим user's.
     def starts(SQ):
         kef_user=0
-        ungzip = []
-        find_url_lst=[]
+        ungzip, ungzip_all, find_url_lst, el =[],[],[],[]
         exl = "/".join(lap).upper() if args.exclude_country is not None else "нет" #искл.регионы_valid.
         one = "/".join(lap).upper() if args.one_level is not None else "нет" #вкл.регионы_valid.
         for username in SQ:
@@ -1182,10 +1167,9 @@ IPv4/v6; GEO-координаты/ссылки; локации; провайде
                 "w", encoding="utf-8")
             file_txt.write("Адрес | ресурс" + "\n\n")
             for website_name in FULL:
-                timefinish = time.time() - timestart
                 dictionary = FULL[website_name]
                 if type(dictionary.get("session_size")) != str:
-                    ungzip.append(dictionary.get("session_size"))
+                    ungzip.append(dictionary.get("session_size")), ungzip_all.append(dictionary.get("session_size"))
                 if dictionary.get("exists") == "найден!":
                     exists_counter += 1
                     find_url_lst.append(exists_counter)
@@ -1199,8 +1183,14 @@ IPv4/v6; GEO-координаты/ссылки; локации; провайде
 ## Размер сесии.
             try:
                 sess_size=round(sum(ungzip)/1024/1024 , 2)
+                s_size_all=round(sum(ungzip_all)/1024/1024 , 2)
             except:
                 sess_size=0.00000000001
+                s_size_all="Err"
+            timefinish = time.time() - timestart - sum(el)
+            el.append(timefinish)
+            time_all = str(round(time.time() - timestart))
+
 ## Запись в html.
             try:
                 file_html = open(f"{dirpath}/results/html/{username}.html", "w", encoding="utf-8")
@@ -1235,7 +1225,7 @@ IPv4/v6; GEO-координаты/ссылки; локации; провайде
                 flag_str_sum = "0"
             file_html.write("</ol>GEO: " + str(flag_str_sum) + ".\n")
             file_html.write("<br> Запрашиваемый объект < <b>" + str(username) + "</b> > найден: <b>" + str(exists_counter) + "</b> раз(а).")
-            file_html.write("<br> Затраченное время на сессию: " + "<b>" + "(%.0f" % float(timefinish) + "сек_ %.2f" % float(sess_size) + "Mb)</b>.\n")
+            file_html.write("<br> Сессия: " + "<b>" + str(round(timefinish)) + "сек_" + str(sess_size) + "Mb)</b>.\n")
             file_html.write("<br> Исключённые регионы: <b>" + str(exl) + ".</b>\n")
             file_html.write("<br> Выбор конкретных регионов: <b>" + str(one) + ".</b>\n")
             file_html.write("<br> База Snoop (Demo Version): <b>" + str(flagBS) + "</b>" + " Websites.\n")
@@ -1296,9 +1286,7 @@ IPv4/v6; GEO-координаты/ссылки; локации; провайде
             censors_cor = int((censors - recensor)/kef_user) #err_connection
             censors_timeout_cor = int(censors_timeout/kef_user) #err time-out
             flagBS_err = round((censors_cor + censors_timeout_cor)*100/flagBS, 3)
-            czr_csv = ''
-            if flagBS_err >= 2:#perc
-                czr_csv = 'Внимание!_Поиск_проходил_при_нестабильном_интернет_соединении_или_Internet-Censorship. Результаты_могут_быть_неполные.'
+
             writer = csv.writer(file_csv)
             writer.writerow(['Никнейм',
                              'Ресурс',
@@ -1310,8 +1298,7 @@ IPv4/v6; GEO-координаты/ссылки; локации; провайде
                              'Общее_замедление/мс',
                              'Отклик/мс',
                              'Общее_время/мс',
-                             'Сессия/Kb',
-                             czr_csv
+                             'Сессия/Kb'
                              ])
             for site in FULL:
                 if FULL[site]['session_size'] == 0:
@@ -1336,23 +1323,27 @@ IPv4/v6; GEO-координаты/ссылки; локации; провайде
             writer.writerow('')
             writer.writerow(['Исключённые_регионы=' + str(exl)])
             writer.writerow(['Выбор_конкретных_регионов=' + str(one)])
+            writer.writerow(["Bad_raw:_" + str(flagBS_err) + "%_БД" if flagBS_err >= 2 else ''])
             writer.writerow('')
             writer.writerow(['Дата'])
             writer.writerow([time.strftime("%d/%m/%Y_%H:%M:%S", time_data)])
             file_csv.close()
 
+            ungzip.clear()
 ## Финишный вывод.
         direct_results = f"{dirpath}/results/*/{username}.*" if sys.platform != 'win32' else f"{dirpath}\\results\\*\\{username}.*"
-        print(Fore.CYAN + "├─Результаты поиска:", "найдено -->", len(find_url_lst), "url (сессия: %.0f" % float(timefinish) + f"сек_{sess_size}Mb)")
-        print(Fore.CYAN + "├──Результаты сохранены в: " + Style.RESET_ALL + direct_results)
+        print(f"{Fore.CYAN}├─Результаты поиска:{Style.RESET_ALL} найдено --> {len(find_url_lst)} url (сессия: {time_all} сек_{s_size_all}Mb)")
+        print(f"{Fore.CYAN}├──Результаты сохранены в:{Style.RESET_ALL} {direct_results}")
         if flagBS_err >= 2:#perc
-            print(Fore.CYAN + "├───Дата поискового запроса:", time.strftime("%d/%m/%Y_%H:%M:%S", time_data))
-            print(Fore.CYAN + f"└────\033[31;1mВнимание! Bad_raw: {flagBS_err}% БД\033[0m")
-            print(Fore.CYAN + "     └─нестабильное соединение или Internet Censorship")
-            print("       \033[36m└─используйте \033[36;1mVPN\033[0m \033[36mили увеличьте значение опции'\033[36;1m-t\033[0m\033[36m'\033[0m\n")
+            print(f"{Fore.CYAN}├───Дата поискового запроса: {time.strftime('%d/%m/%Y_%H:%M:%S', time_data)}")
+            print(f"{Fore.CYAN}└────\033[31;1mВнимание! Bad_raw: {flagBS_err}% БД\033[0m")
+            print(f"{Fore.CYAN}     └─нестабильное соединение или Internet Censorship")
+            print("       \033[36m└─используйте \033[36;1mVPN\033[0m \033[36mили увеличьте значение опции \
+'\033[36;1m-t\033[0m\033[36m'\033[0m\n")
         else:
-            print(Fore.CYAN + "└───Дата поискового запроса:", time.strftime("%d/%m/%Y_%H:%M:%S", time_data), "\n")
+            print(f"{Fore.CYAN}└───Дата поискового запроса: {time.strftime('%d/%m/%Y_%H:%M:%S', time_data)}\n")
         console.print(Panel(f"{e_mail} до {Do}",title=license, style=STL(color="white", bgcolor="blue")))
+
 ## Музыка.
         try:
             if args.no_func==False:
@@ -1367,6 +1358,7 @@ IPv4/v6; GEO-координаты/ссылки; локации; провайде
                     webbrowser.open(f"file://{dirpath}/results/html/{username}.html")
                 except:
                     pass
-## Arbeiten...
+## поиск по выбранным пользователям.
     starts(args.username) if args.user==False else starts(userlists)
-run()
+## Arbeiten...
+run() #$( snoop(...) --> def(...) --> starts() ).
