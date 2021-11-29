@@ -1,6 +1,7 @@
 #! /usr/bin/env python3
 # Copyright (c) 2020 Snoop Project <snoopproject@protonmail.com>
 
+import argparse
 import base64
 import csv
 import glob
@@ -19,8 +20,6 @@ import sys
 import time
 import webbrowser
 
-from argparse import ArgumentTypeError
-from argparse import ArgumentParser, RawDescriptionHelpFormatter
 from collections import Counter
 from colorama import Fore, Style, init
 from concurrent.futures import ProcessPoolExecutor, ThreadPoolExecutor
@@ -47,10 +46,16 @@ _____/ _|  _|\___/ \___/  .__/
 """)
 
 print (Fore.CYAN + "#Примеры:" + Style.RESET_ALL)
-print (Fore.CYAN + " cd ~/snoop" + Style.RESET_ALL)
-print (Fore.CYAN + " python snoop.py --help" + Style.RESET_ALL, "#справка")
-print (Fore.CYAN + " python snoop.py nickname" + Style.RESET_ALL, "#поиск user-a")
-print (Fore.CYAN + " python snoop.py --module y" + Style.RESET_ALL, "#задействовать плагины")
+if sys.platform == 'win32':
+    print (Fore.CYAN + " cd с:\<path>\snoop" + Style.RESET_ALL)
+    print (Fore.CYAN + " python snoop.py --help" + Style.RESET_ALL, "#справка")
+    print (Fore.CYAN + " python snoop.py nickname" + Style.RESET_ALL, "#поиск user-a")
+    print (Fore.CYAN + " python snoop.py --module" + Style.RESET_ALL, "#задействовать плагины")
+else:
+    print (Fore.CYAN + " cd ~/snoop" + Style.RESET_ALL)
+    print (Fore.CYAN + " python3 snoop.py --help" + Style.RESET_ALL, "#справка")
+    print (Fore.CYAN + " python3 snoop.py nickname" + Style.RESET_ALL, "#поиск user-a")
+    print (Fore.CYAN + " python3 snoop.py --module" + Style.RESET_ALL, "#задействовать плагины")
 console.rule(characters = '=', style="cyan")
 print("")
 
@@ -261,16 +266,22 @@ def snoop(username, BDdemo_new, verbose=False, norm=False, reports=False, user=F
     if cert == True:
         my_session.verify = False
         requests.packages.urllib3.disable_warnings()
-    session0 = ElapsedFuturesSession(executor=ThreadPoolExecutor(max_workers=16), session=my_session)
+
     if not sys.platform == 'win32':
         if "arm" in platform.platform(aliased=True, terse=0) or "aarch64" in platform.platform(aliased=True, terse=0):
             session1 = ElapsedFuturesSession(executor=ThreadPoolExecutor(max_workers=10), session=my_session)
         else:
-            session1 = ElapsedFuturesSession(executor=ProcessPoolExecutor(max_workers=26), session=my_session)
+            if norm == False:
+                session1 = ElapsedFuturesSession(executor=ProcessPoolExecutor(max_workers=26), session=my_session)
+            else:
+                session1 = ElapsedFuturesSession(executor=ThreadPoolExecutor(max_workers=16), session=my_session)
     else:
-        session1 = ElapsedFuturesSession(executor=ThreadPoolExecutor(max_workers=16), session=my_session)
-    session2 = FuturesSession(max_workers=4, session=my_session)
-    session3 = ElapsedFuturesSession(executor=ThreadPoolExecutor(max_workers=2), session=my_session)
+        session1 = ElapsedFuturesSession(executor=ThreadPoolExecutor(max_workers=15), session=my_session)
+
+    if reports:
+        session2 = FuturesSession(max_workers=1, session=my_session)
+    if norm == False:
+        session3 = ElapsedFuturesSession(executor=ThreadPoolExecutor(max_workers=1), session=my_session)
 
 ### Создание futures на все запросы. Это позволит распараллетить запросы.
     for websites_names, param_websites in BDdemo_new.items():
@@ -278,6 +289,7 @@ def snoop(username, BDdemo_new, verbose=False, norm=False, reports=False, user=F
 
         param_websites.pop('usernameON', None)
         param_websites.pop('usernameOFF', None)
+        param_websites.pop('comments', None)
 
 ## Запись URL основного сайта и флага страны (сопоставление в БД).
         results_site['flagcountry'] = param_websites.get("country")
@@ -307,7 +319,7 @@ def snoop(username, BDdemo_new, verbose=False, norm=False, reports=False, user=F
 ## Не нужно делать проверку на сайте: если это имя пользователя не допускается.
             if exclusionYES and re.search(exclusionYES, username):
                 if not print_found_only:
-                    print_invalid("", websites_names, f"Недопустимый формат имени для данного сайта", color)
+                    print_invalid("", websites_names, f"недопустимый ник '{username}' для данного сайта", color)
             results_site["exists"] = "invalid_nick"
             results_site["url_user"] = '*'*56
             results_site['countryCSV'] = "****"
@@ -332,20 +344,14 @@ def snoop(username, BDdemo_new, verbose=False, norm=False, reports=False, user=F
 ## Существует специальный URL (обычно о нем мы не догадываемся/api) для проверки существования отдельно юзера.
                 url_API = url_API.format(username)
 
-## Если нужен только статус кода, не загружать тело страницы.
-            if norm == False:
-                if reports == True or param_websites["errorTypе"] == 'message' or param_websites["errorTypе"] == 'response_url':
-                    request_method = session1.get
-                else:
-                    request_method = session1.head
+## Если нужен только статус кода, не загружать тело страницы, экономими память для status/redirect методов.
+            if reports == True or param_websites["errorTypе"] == 'message' or param_websites["errorTypе"] == 'response_url':
+                request_method = session1.get
             else:
-                if reports == True or param_websites["errorTypе"] == 'message' or param_websites["errorTypе"] == 'response_url':
-                    request_method = session0.get
-                else:
-                    request_method = session0.head
+                request_method = session1.head
 
+## Сайт перенаправляет запрос на другой URL.
             if param_websites["errorTypе"] == "response_url" or param_websites["errorTypе"] == "redirection":
-## Сайт перенаправляет запрос на другой URL, если имя пользователя не существует.
 ## Имя найдено. Запретить перенаправление чтобы захватить статус кода из первоначального url.
                 allow_redirects = False
             else:
@@ -376,11 +382,11 @@ def snoop(username, BDdemo_new, verbose=False, norm=False, reports=False, user=F
 # Панель вербализации.
         if not "arm" in platform.platform(aliased=True, terse=0) and not "aarch64" in platform.platform(aliased=True, terse=0):
             if color == True:
-                console.print(Panel("[yellow]об.время[/yellow] | [magenta]об.% выполнения[/magenta] | \
+                console.print(Panel("[yellow]об.время[/yellow] | [magenta]об.% выполн.[/magenta] | \
 [bold cyan]отклик сайта[/bold cyan] | [bold red]цвет.[bold cyan]об[/bold cyan].скор.[/bold red] | [bold cyan]разм.расп.данных[/bold cyan]",
                 title="Обозначение", style=STL(color="cyan")))
             else:
-                console.print(Panel("об.время | об.% выполнения | отклик сайта | цвет.об.время | разм.расп.данных" , title="Обозначение"))
+                console.print(Panel("об.время | об.% выполн. | отклик сайта | цвет.об.время | разм.расп.данных" , title="Обозначение"))
         else:
             if color == True:
                 console.print(Panel("[yellow]time[/yellow] | [magenta]perc.[/magenta] | \
@@ -459,11 +465,12 @@ def snoop(username, BDdemo_new, verbose=False, norm=False, reports=False, user=F
             if error_type == "message":
                 error = param_websites.get("errorMsg")
                 error2 = param_websites.get("errоrMsg2")
+                error3 = param_websites.get("errorMsg3") if param_websites.get("errorMsg3") is not None else "NoneNoneNone"
                 if param_websites.get("errorMsg2"):
                     sys.exit()
 #                print(r.text) #проверка ответа (+- '-S')
 #                print(r.status_code) #Проверка ответа
-                if error2 in r.text or error in r.text:
+                if error2 in r.text or error in r.text or error3 in r.text:
                     if not print_found_only:
                         print_not_found(websites_names, response_time, verbose, color)
                     exists = "увы"
@@ -579,15 +586,15 @@ def timeout_check(value):
         global timeout
         timeout = int(value)
     except:
-        raise ArgumentTypeError(f"\n\033[31;1mTimeout '{value}' Err,\033[0m \033[36mукажите время в 'секундах'. \033[0m")
+        raise argparse.ArgumentTypeError(f"\n\033[31;1mTimeout '{value}' Err,\033[0m \033[36mукажите время в 'секундах'. \033[0m")
     if timeout <= 0:
-        raise ArgumentTypeError(f"\033[31;1mTimeout '{value}' Err,\033[0m \033[36mукажите время > 0sec. \033[0m")
+        raise argparse.ArgumentTypeError(f"\033[31;1mTimeout '{value}' Err,\033[0m \033[36mукажите время > 0sec. \033[0m")
     return timeout
 
 ## Обновление Snoop.
 def update_snoop():
     print(
-"""\033[36mВы действительно хотите:
+"""\033[36m\nВы действительно хотите:
                     __             _  
    ._  _| _._|_ _  (_ ._  _  _ ._   ) 
 |_||_)(_|(_| |_(/_ __)| |(_)(_)|_) o  
@@ -618,6 +625,7 @@ def autoclean():
         print(f"\033[31;1mdeleted --> {rm}\033[0m\033[36m {len(delfiles)} files, {round(total_size/1024/1024, 2)} Mb\033[0m")
     except:
         console.log("[red]Ошибка")
+    sys.exit()
 
 ## Пожертвование.
 def donate():
@@ -663,20 +671,25 @@ border_style="bold blue"))# ,style="bold green"))
     print(Style.BRIGHT + Fore.RED + "Выход")
     sys.exit()
 
+## Лицензия/версия.
+def license_snoop():
+    with open('COPYRIGHT', 'r', encoding="utf8") as copyright:
+        cop = copyright.read().replace("\ufeffSnoop", "Snoop")
+        console.print(Panel(cop, title='COPYRIGHT', style=STL(color="white", bgcolor="blue")))
+
+    console.print('\n',
+Panel(f"""Snoop: {platform.architecture(executable=sys.executable, bits='', linkage='')}
+Source: {version}
+OS: {platform.platform(aliased=True, terse=0)}
+Python: {platform.python_version()}""",
+title='snoop info', style=STL(color="cyan")))
+    sys.exit()
+#    print(repr(cop))
+
 ### ОСНОВА.
 def run():
-## Лицензия.
-    with open('COPYRIGHT', 'r', encoding="utf8") as copyright:
-        cop = copyright.read()
-
-    version_snoop = f"\033[37m{cop}\033[0m\n" + \
-                    f"\033[36mSnoop: {platform.architecture(executable=sys.executable, bits='', linkage='')}\033[36m\n" + \
-                    f"\033[36mSource: {version}\033[36m\n" +  \
-                    f"\033[36mOS: {platform.platform(aliased=True, terse=0)}\033[36m\n" + \
-                    f"\033[36mPython: {platform.python_version()}\033[36m\n\n"
-
 ## Назначение опций Snoop.
-    parser = ArgumentParser(formatter_class = RawDescriptionHelpFormatter,
+    parser = argparse.ArgumentParser(formatter_class = argparse.RawDescriptionHelpFormatter,
                             usage = 'python3 %(prog)s [options] nickname\nor\nusage: python3 %(prog)s nickname [options]\n ',
                             description = Fore.CYAN + "Справка" + Style.RESET_ALL,
                             epilog = (Fore.CYAN + f"Snoop " + Style.BRIGHT + Fore.RED + f"Demo Version " + Style.RESET_ALL + \
@@ -686,31 +699,31 @@ def run():
                            )
 # Service arguments.
     service_group = parser.add_argument_group('\033[36mservice arguments\033[0m')
-    service_group.add_argument("--version", "-V", action="version",  version=(version_snoop),
+    service_group.add_argument("--version", "-V", action="store_true",
                                help="\033[36mA\033[0mbout: вывод на печать версий:: OS; Snoop; Python и Лицензии"
                               )
-    service_group.add_argument("--list all", "-l y", action="store_true", dest="listing",
+    service_group.add_argument("--list-all", "-l", action="store_true", dest="listing",
                                help="\033[36mВ\033[0mывести на печать детальную информацию о базе данных Snoop"
                               )
-    service_group.add_argument("--donate y", "-d y", action="store_true", dest="donation",
+    service_group.add_argument("--donate", "-d", action="store_true", dest="donation",
                                help="\033[36mП\033[0mожертвовать на развитие Snoop Project-а, получить/приобрести \
                                \033[32;1mSnoop Full Version\033[0m"
                               )
-    service_group.add_argument("--autoclean y", "-a y", action="store_true", dest="autoclean", default=False,
+    service_group.add_argument("--autoclean", "-a", action="store_true", dest="autoclean", default=False,
                                help="\033[36mУ\033[0mдалить все отчеты, очистить место"
                               )
-    service_group.add_argument("--update y", "-U y", action="store_true", dest="update",
+    service_group.add_argument("--update", "-U", action="store_true", dest="update",
                                help="\033[36mО\033[0mбновить Snoop"
                               )
 # Plugins arguments arguments.
     plugins_group = parser.add_argument_group('\033[36mplugins arguments\033[0m')
-    plugins_group.add_argument("--module y", "-m y", action="store_true", dest="module", default=False,
+    plugins_group.add_argument("--module", "-m", action="store_true", dest="module", default=False,
                                help="\033[36mO\033[0mSINT поиск: задействовать различные плагины Snoop:: IP/GEO/YANDEX \
                                (список плагинов будет пополняться)"
                               )
 # Search arguments.
     search_group = parser.add_argument_group('\033[36msearch arguments\033[0m')
-    search_group.add_argument("username", nargs='+', metavar='nickname', action="store",
+    search_group.add_argument("username", nargs='*', metavar='nickname', action="store", default=None,
                               help="\033[36mН\033[0mикнейм разыскиваемого пользователя. \
                               Поддерживается поиск одновременно нескольких имён.\
                               Ник, содержащий в своем имени пробел, заключается в кавычки"
@@ -726,7 +739,7 @@ def run():
                               В demo version функция отключена"
                              )
     search_group.add_argument("--site", "-s chess", action="append", metavar='', dest="site_list",  default=None,
-                              help="\033[36mУ\033[0mказать имя сайта из БД '--list all'. Поиск 'username' на одном указанном ресурсе, \
+                              help="\033[36mУ\033[0mказать имя сайта из БД '--list-all'. Поиск 'username' на одном указанном ресурсе, \
                               допустимо использовать опцию '-s' несколько раз"
                              )
     search_group.add_argument("--exclude", "-e RU", action="append", metavar='', dest="exclude_country",  default=None,
@@ -760,8 +773,8 @@ def run():
                              )
     search_group.add_argument("--userload", "-u", metavar='', action="store", dest="user", default=False,
                               help="\033[36mУ\033[0mказать файл со списком user-ов. \
-                              Пример_Linux: 'python3 snoop.py -u ~/listusers.txt start'.\
-                              Пример_Windows: 'python snoop.py -u c:\\User\\User\Documents\\listusers.txt start'"
+                              Пример_Linux: 'python3 snoop.py -u ~/listusers.txt'.\
+                              Пример_Windows: 'python snoop.py -u c:\\User\\User\Documents\\listusers.txt'"
                              )
     search_group.add_argument("--save-page", "-S", action="store_true", dest="reports", default=False,
                               help="\033[36mС\033[0mохранять найденные странички пользователей в локальные файлы"
@@ -771,7 +784,7 @@ def run():
                               на серверах включена на Snoop for Android, что повышает скорость поиска,
                               но дает больший percent ложных срабатываний"""
                              )
-    search_group.add_argument("--normal", "-N", action="store_true", dest="norm", default=True,
+    search_group.add_argument("--normal", "-N", action="store_false", dest="norm", default=True,
                               help="""\033[36mП\033[0mереключатель режимов: SNOOPninja > нормальный режим > SNOOPninja.
                               По_умолчанию (GNU/Linux Full Version) вкл 'режим SNOOPninja':
                               ускорение поиска ~25pct, экономия ОЗУ ~50pct, повторное 'гибкое' соединение на сбойных ресурсах.
@@ -780,17 +793,13 @@ def run():
                              )
 
     args = parser.parse_args()
+#    print(args)
+    if args.version:
+        license_snoop()
 
 ## Опции  '-cseo' несовместимы между собой.
-    list_cseo = []
-
-    list_cseo.append(bool(args.site_list))
-    list_cseo.append(bool(args.country))
-    list_cseo.append(bool(args.exclude_country))
-    list_cseo.append(bool(args.one_level))
-
     k=0
-    for _ in list_cseo:
+    for _ in bool(args.site_list), bool(args.country), bool(args.exclude_country), bool(args.one_level):
         if _ == True:
             k += 1
         if k == 2:
@@ -800,8 +809,8 @@ def run():
     if args.autoclean:
         print(Fore.CYAN + "[+] активирована опция '-a': «удаление накопленных отчетов»\n")
         autoclean()
-        sys.exit()
-## Информативный вывод.
+## Опция  '-m'.
+# Информативный вывод.
     if args.module:
         print(Fore.CYAN + "[+] активирована опция '-m': «модульный поиск»")
         def module():
@@ -895,8 +904,8 @@ IPv4/v6; GEO-координаты/ссылки; локации; провайде
         print(Fore.CYAN + "[+] активирована опция '-C': «проверка сертификатов на серверах вкл»")
 ## Опция режима SNOOPnina > < нормальный режим.
     if args.norm == False:
+        print(Fore.CYAN + "[-] деактивирована опция '--': «режим SNOOPninja»")
         sys.exit()
-        print(Fore.CYAN + "[+] активирована опция '--': «режим SNOOPninja»")
 ## Опция  '-w'.
     if args.web:
         print(Fore.CYAN + "[+] активирована опция '-w': «подключение к внешней web_database»")
@@ -921,12 +930,12 @@ IPv4/v6; GEO-координаты/ссылки; локации; провайде
         "    допустимо использовать опцию '-s' несколько раз\n"
         "    [опция '-s'] несовместима с [опциями '-с', '-e', 'o']")
 ## Опция '-v'.
-    if args.verbose:
+    if args.verbose and bool(args.username):
         print(Fore.CYAN + "[+] активирована опция '-v': «подробная вербализация в CLI»\n")
         with console.status("[cyan]Ожидайте, идёт самотестирование сети..."):
             networktest.nettest()
             console.log("[cyan]--> тест сети")
-## Опция '--list all'.
+## Опция '--list-all'.
     if args.listing:
         print(
 "\033[36m\nСортировать БД Snoop по странам, по имени сайта или обобщенно ?\n" + \
@@ -988,11 +997,11 @@ IPv4/v6; GEO-координаты/ссылки; локации; провайде
                 for i in enumerate(sorted(listwindows, key=str.lower), 1):
                     print(f"{Style.BRIGHT}{Fore.GREEN}{i[0]}. {Style.RESET_ALL}{Fore.CYAN}{i[1]}" ,end = '')
 
-# Действие не выбрано --list all.
+# Действие не выбрано --list-all.
             else:
-                print(Style.BRIGHT + Fore.RED + "Извините, но вы не выбрали действие\nвыход")
+                print(Style.BRIGHT + Fore.RED + "└──Извините, но вы не выбрали действие [1/2/3]\nвыход")
                 sys.exit()
-# Запуск функции '--list all'.
+# Запуск функции '--list-all'.
         if sortY != "3":
             sort_list_all(BDflag, Fore.GREEN, "Full Version", line = "str_line")
             sort_list_all(BDdemo, Fore.RED, "Demo Version")
@@ -1026,21 +1035,22 @@ IPv4/v6; GEO-координаты/ссылки; локации; провайде
                         continue
                     else:
                         userlists.append(i)
+            print(Fore.CYAN + f"[+] активирована опция '-u': «розыск user-ов из файла: \033[36;1m{userfile}\033[0m\033[36m»\033[0m")
+            print(Fore.CYAN + f"    Будем искать: {userlists[:3]} и других..." + Style.RESET_ALL)
             if userlists_bad:
-                print(Style.RESET_ALL + Style.BRIGHT + Fore.RED + f"Следующие [username] из '{userfile}' содержат ошибки и будут пропущены:")
-                print(Style.BRIGHT + Fore.RED + f"{userlists_bad}" + Style.RESET_ALL)
+                print(Style.BRIGHT + Fore.RED + f"\nСледующие [username] из '{userfile}' содержат ошибки и будут пропущены:")
+                print(Style.BRIGHT + Fore.RED + f"{userlists_bad}\n" + Style.RESET_ALL)
         except:
             print(f"\033[31;1mНе могу найти_прочитать '{userfile}'!\033[0m \033[36mПожалуйста, укажите текстовый файл в кодировке —\033[0m \033[36;1mutf-8.\033[0m\n")
             print("\033[36mПо умолчанию блокнот в OS Windows сохраняет текст в кодировке — ANSI\033[0m")
             print("\033[36mОткройте ваш список пользователей и измените кодировку [файл ---> сохранить как ---> utf-8]")
             print("\033[36mИли удалите из файла нечитаемые символы.")
             sys.exit()
-        print(Fore.CYAN + f"[+] активирована опция '-u': «розыск user-ов из файла: \033[36;1m{userfile}\033[0m\033[36m»\033[0m")
-        print(Fore.CYAN + "    Будем искать:" + f" {userlists[:3]}" + " и других..." + Style.RESET_ALL)
 
 ## Проверка остальных (в т.ч. повтор) опций.
 ## Опция '--update y' обновление Snoop.
     if args.update:
+        print(Fore.CYAN + "[+] активирована опция '-U': «Обновление Snoop»")
         update_snoop()
 ## Опция '-w'.
     if args.web:
@@ -1130,6 +1140,13 @@ IPv4/v6; GEO-координаты/ссылки; локации; провайде
         "    допустимо использовать опцию '-o' несколько раз\n"
         "    [опция '-o'] несовместима с [опциями '-s', '-c', 'e']")
 
+## Ник не задан или противоречие.
+    if bool(args.username) == False and bool(args.user) == False:
+        print("\033[31;1mnickname не задан(ы)\n\nВыход")
+        sys.exit()
+    if bool(args.username) == True and bool(args.user) == True:
+        print("\033[31;1mвыберите для поиска nickname(s) из файла или задайте в cli,\nно не одновременно из файла и cli.\n\nВыход")
+        sys.exit()
 ## Опция  '-w' не активна.
     try:
         if args.web == False:
@@ -1137,6 +1154,7 @@ IPv4/v6; GEO-координаты/ссылки; локации; провайде
             Style.BRIGHT + Fore.CYAN + f"{len(BDdemo)}" + "_Websites" + Style.RESET_ALL)
     except:
         print("\033[31;1mInvalid загружаемая база данных.\033[0m")
+
 
 ## Крутим user's.
     def starts(SQ):
@@ -1152,6 +1170,7 @@ IPv4/v6; GEO-координаты/ссылки; локации; провайде
                         color=not args.no_func)
 
             exists_counter = 0
+
 ## Запись в txt.
             try:
                 file_txt = open(f"{dirpath}/results/txt/{username}.txt", "w", encoding="utf-8")
@@ -1168,13 +1187,7 @@ IPv4/v6; GEO-координаты/ссылки; локации; провайде
                     exists_counter += 1
                     find_url_lst.append(exists_counter)
                     file_txt.write(dictionary ["url_user"] + " | " + (website_name)+"\n")
-            file_txt.write("\n" f"Запрашиваемый объект: <{username}> найден: {exists_counter} раз(а).")
-            file_txt.write("\n" f"База Snoop (Demo Version): {flagBS} Websites.")
-            file_txt.write("\n" f"Исключённые регионы: {exl}.")
-            file_txt.write("\n" f"Выбор конкретных регионов: {one}.")
-            file_txt.write("\n" f"Обновлено: " + time.strftime("%d/%m/%Y_%H:%M:%S", time_date) + ".")
-            file_txt.close()
-## Размер сесии.
+# Размер сессии персональный и общий, кроме CSV.
             try:
                 sess_size=round(sum(ungzip)/1024/1024 , 2)
                 s_size_all=round(sum(ungzip_all)/1024/1024 , 2)
@@ -1184,6 +1197,14 @@ IPv4/v6; GEO-координаты/ссылки; локации; провайде
             timefinish = time.time() - timestart - sum(el)
             el.append(timefinish)
             time_all = str(round(time.time() - timestart))
+
+            file_txt.write("\n" f"Запрашиваемый объект: <{username}> найден: {exists_counter} раз(а).")
+            file_txt.write("\n" f"Сессия: {str(round(timefinish))}сек {str(sess_size)}Mb.")
+            file_txt.write("\n" f"База Snoop (Demo Version): {flagBS} Websites.")
+            file_txt.write("\n" f"Исключённые регионы: {exl}.")
+            file_txt.write("\n" f"Выбор конкретных регионов: {one}.")
+            file_txt.write("\n" f"Обновлено: " + time.strftime("%d/%m/%Y_%H:%M:%S", time_date) + ".")
+            file_txt.close()
 
 ## Запись в html.
             try:
@@ -1218,7 +1239,7 @@ IPv4/v6; GEO-координаты/ссылки; локации; провайде
                 flag_str_sum = "0"
             file_html.write("</ol>GEO: " + str(flag_str_sum) + ".\n")
             file_html.write("<br> Запрашиваемый объект < <b>" + str(username) + "</b> > найден: <b>" + str(exists_counter) + "</b> раз(а).")
-            file_html.write("<br> Сессия: " + "<b>" + str(round(timefinish)) + "сек_" + str(sess_size) + "Mb)</b>.\n")
+            file_html.write("<br> Сессия: " + "<b>" + str(round(timefinish)) + "сек_" + str(sess_size) + "Mb</b>.\n")
             file_html.write("<br> Исключённые регионы: <b>" + str(exl) + ".</b>\n")
             file_html.write("<br> Выбор конкретных регионов: <b>" + str(one) + ".</b>\n")
             file_html.write("<br> База Snoop (Demo Version): <b>" + str(flagBS) + "</b>" + " Websites.\n")
