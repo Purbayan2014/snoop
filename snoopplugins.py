@@ -1,6 +1,6 @@
 #! /usr/bin/env python3
 # Copyright (c) 2020 Snoop Project <snoopproject@protonmail.com>
-"Плагины Snoop Project"
+"Плагины Snoop Project/Черновик"
 
 import csv
 import itertools
@@ -91,9 +91,8 @@ def donate():
 Snoop Full Version готовой сборки то есть исполняемого файла, 
 для Windows — это 'snoop.exe', для GNU/Linux — 'snoop'.
 
-Snoop в исполняемом виде (бинарник) предоставляется по лицензии, с которой пользователь
-должен ознакомиться перед покупкой ПО. Лицензия (RU/EN) для Snoop Project в
-исполняемом виде находится в rar-архивах демо версий Snoop по ссылке[/bold green]
+Snoop в исполняемом виде (бинарник) предоставляется по лицензии, с которой пользователь должен ознакомиться перед покупкой ПО.
+Лицензия (RU/EN) для Snoop Project в исполняемом виде находится в rar-архивах демо версий Snoop по ссылке:[/bold green]
 [cyan]https://github.com/snooppr/snoop/releases[/cyan][bold green], а так же лицензия доступна по команде '[/bold green][cyan]snoop -V[/cyan][bold green]' или '[/bold green][cyan]snoop.exe -V[/cyan][bold green]' у исполняемого файла.
 
 Если Snoop требуется вам для служебных или образовательных задач,
@@ -123,11 +122,11 @@ def module3():
         def parsingYa(login):
 # Запись в txt
             if Ya == '4':
-                file_txt = open(dirresults + "/results/Yandex_parser/" + str(hvostfile) + '_' + \
+                file_txt = open(dirresults + "/results/plugins/Yandex_parser/" + str(hvostfile) + '_' + \
                 time.strftime("%d_%m_%Y_%H_%M_%S", time_data) + ".txt", "w", encoding="utf-8")
             #raise Exception("")
             else:
-                file_txt = open(dirresults + "/results/Yandex_parser/" + str(login) + ".txt", "w", encoding="utf-8")
+                file_txt = open(dirresults + "/results/plugins/Yandex_parser/" + str(login) + ".txt", "w", encoding="utf-8")
 
 # Парсинг
             for login in listlogin:
@@ -162,6 +161,7 @@ def module3():
                     pub = rdict.get("public_id")
                     name = rdict.get("display_name")
                     email=str(login)+"@yandex.ru"
+                    avatar = rdict.get("default_avatar_id")
 
                     if rdict.get("display_name") == "-No-":
                         if Ya != '4':
@@ -191,16 +191,19 @@ def module3():
                             music=f"https://music.yandex.ru/users/{login}/tracks"
                         dzen=f"https://zen.yandex.ru/user/{pub}"
                         qu=f"https://yandex.ru/q/profile/{pub}/"
+                        avatar_html = f"https://avatars.mds.yandex.net/get-yapic/{avatar}/islands-retina-50"
+                        avatar_cli = f"https://avatars.mds.yandex.net/get-yapic/{avatar}/islands-300"
 
                         print("\033[32;1mЯ.Отзывы:\033[0m", otzyv)
                         print("\033[32;1mЯ.Маркет:\033[0m", market)
                         print("\033[32;1mЯ.Музыка:\033[0m", music)
                         print("\033[32;1mЯ.Дзен:\033[0m", dzen)
                         print("\033[32;1mЯ.Кью:\033[0m", qu)
+                        print("\033[32;1mAvatar:\033[0m", avatar_cli)
 
-                        yalist=[otzyv, market, music, dzen, qu]
+                        yalist=[avatar_html, otzyv, market, music, dzen, qu]
 
-                        file_txt.write(f"{login} | {email} | {name}\n{otzyv}\n{market}\n{music}\n{dzen}\n{qu}\n\n")
+                        file_txt.write(f"{login} | {email} | {name}\n{avatar_cli}\n{otzyv}\n{market}\n{music}\n{dzen}\n{qu}\n\n")
 
                     for webopen in yalist:
                         if webopen == music and Ya == '3':
@@ -269,7 +272,7 @@ username3
 
 Плагин генерирует, но не проверяет 'доступность' персональных страниц пользователей по причине: частая защита страниц Я.капчей.
 
-Все результаты сохраняются в '\033[36m~/snoop/results/Yandex_parser/*\033[0m\033[32m'\033[0m""")
+Все результаты сохраняются в '\033[36m~/snoop/results/plugins/Yandex_parser/*\033[0m\033[32m'\033[0m""")
             helpend()
 
 # Указать login
