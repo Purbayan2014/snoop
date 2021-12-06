@@ -816,7 +816,7 @@ def run():
                               на серверах включена на Snoop for Android, что повышает скорость поиска,
                               но может дать больший percent ложных срабатываний"""
                              )
-    search_group.add_argument("--headers", "-H <name>", action="append", metavar='', dest="headerS",  default=None,
+    search_group.add_argument("--headers", "-H <name>", metavar='', dest="headerS", nargs=1, default=None,
                               help="""\033[36mЗ\033[0mадать user-agent вручную, агент заключается в кавычки, по умолчанию для каждого сайта
                                задаётся случайный либо переопреденный user-agent из БД snoop. https://юзерагент.рф/"""
                              )
@@ -944,7 +944,7 @@ IPv4/v6; GEO-координаты/ссылки; локации; провайде
         logo(text="⛔️ Режим подробной вербализации [опция '-v'] отображает детальную информацию,\n   [опция '-f'] неуместна")
 ## Опция  '-С'.
     if args.cert:
-        print(Fore.CYAN + "[+] активирована опция '-C': «выкл. проверку сертификатов на серверах»")
+        print(Fore.CYAN + "[+] активирована опция '-C': «проверка сертификатов на серверах выкл»")
 ## Опция режима SNOOPnina > < нормальный режим.
     if args.norm == False:
         logo(text="[-] в demo деактивирован переключатель '--': «режимов SNOOPninja/Normal»")
