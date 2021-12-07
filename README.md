@@ -4,7 +4,9 @@ Snoop Project for Termux
 ## Snoop Project один из самых перспективных OSINT-инструментов по поиску никнеймов.
 - [X] This is the most powerful software taking into account the CIS location.
 
-<img src="https://raw.githubusercontent.com/snooppr/snoop/master/images/snoopandroid.png" width="70%" />  
+<p align="center">  
+  <img src="https://raw.githubusercontent.com/snooppr/snoop/master/images/snoopandroid.png" width="70%" />  
+</p>  
 
 Is your life slideshow? Ask Snoop.  
 Snoop project is developed without taking into account the opinions of the NSA and their friends,  
@@ -15,7 +17,9 @@ that is, it is available to the average user.
 **Self-build software from source**
 
 ## Snoop for Android/Demo  
-<img src="https://raw.githubusercontent.com/snooppr/snoop/master/images/Snoop_termux.plugins.png" width="90%" />  
+<p align="center">  
+  <img src="https://raw.githubusercontent.com/snooppr/snoop/master/images/Snoop_termux.plugins.png" width="90%" />  
+</p>  
 
 **Native Installation**  
 
@@ -50,7 +54,9 @@ $ printf "alias snoop='cd && cd snoop && python snoop.py'" >> .bashrc
 $ alias snoopcheck='cd && cd snoop && printf 2 | python snoop.py --list-all | grep -i' >> .bashrc  
 # перезапустить Termux.  
 ```
-<img src="https://raw.githubusercontent.com/snooppr/snoop/master/images/snoop_alias.gif" width="50%" />  ```
+<p align="center">  
+  <img src="https://raw.githubusercontent.com/snooppr/snoop/master/images/snoop_alias.gif" width="40%" />  
+</p>  
 
 
 ## Using
@@ -168,7 +174,7 @@ $ python3 snoop.py -с -t 9 -f -S -u ~/file.txt -w
 
 # 'ctrl-c' — прервать поиск
 ```
-Найденные учетные записи будут храниться в '~/snoop/results/*/username.{txt.csv.html}'.  
+Найденные учетные записи будут храниться в '~/snoop/results/nicknames/*/username.{txt.csv.html}'.  
 Для доступа браузера к результатам поиска на платформе Android желательно иметь рут права.  
 csv открывать в *office, разделитель полей **запятая**.  
 
@@ -181,4 +187,6 @@ $ python3 snoop.py --update y #Требуется установка Git.
 ```
 
 **An example of searching Phone**  
-<img src="https://raw.githubusercontent.com/snooppr/snoop/master/images/Android%20snoop_run.png" width="70%" />
+<p align="center">  
+  <img src="https://raw.githubusercontent.com/snooppr/snoop/master/images/Android%20snoop_run.png" width="70%" />  
+</p>  
