@@ -6,7 +6,7 @@ Snoop Project for Termux
 • [English readme Snoop for Termux](https://github.com/snooppr/snoop/blob/snoop_termux/README.en.md "Please feel free to improve the translation of this page.")  
 
 <p align="center">  
-  <img src="https://raw.githubusercontent.com/snooppr/snoop/master/images/snoopandroid.png" width="70%" />  
+  <img src="https://raw.githubusercontent.com/snooppr/snoop/master/images/snoopandroid.png" />  
 </p>  
 
 Ваша жизнь Слайд-шоу? Спросите снуп.  
