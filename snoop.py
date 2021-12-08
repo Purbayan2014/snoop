@@ -265,6 +265,7 @@ def snoop(username, BDdemo_new, verbose=False, norm=False, reports=False, user=F
     elif username[0] == "9" and len(username) == 10 and username.isdigit() == True:
         print (Style.BRIGHT + Fore.RED + "\nSnoop выслеживает учётки пользователей, но не номера телефонов...")
         sys.exit()
+
     global nick
     nick = username
 ## Создать много_поточный/процессный сеанс для всех запросов.
@@ -290,7 +291,7 @@ def snoop(username, BDdemo_new, verbose=False, norm=False, reports=False, user=F
     if norm == False:
         session3 = ElapsedFuturesSession(executor=ThreadPoolExecutor(max_workers=1), session=my_session)
 
-### Создание futures на все запросы. Это позволит распараллетить запросы.
+### Создание futures на все запросы. Это позволит распараллетить запросы с прерываниями.
     for websites_names, param_websites in BDdemo_new.items():
         results_site = {}
 
@@ -319,7 +320,7 @@ def snoop(username, BDdemo_new, verbose=False, norm=False, reports=False, user=F
             headers.update(param_websites["headers"])
         if headerS is not None:
             headers.update({"User-Agent":''.join(headerS)})
-        #console.print(headers) #проверка u-агентов.
+        #console.print(headers, websites_names) #проверка u-агентов.
 ## Пропуск временно-отключенного сайта и не делать запрос, если имя пользователя не подходит для сайта.
         exclusionYES = param_websites.get("exclusion")
         if exclusionYES and re.search(exclusionYES, username) or param_websites.get("bad_site") == 1:
@@ -371,7 +372,6 @@ def snoop(username, BDdemo_new, verbose=False, norm=False, reports=False, user=F
 ## Добавлять флаги/url-s в будущий-окончательный словарь с будущими всеми другими результатами.
         dic_snoop_full[websites_names] = results_site
 
-    li_time = [0]
     if verbose == False:
 # Прогресс.
         if sys.platform != 'win32':
@@ -400,6 +400,7 @@ def snoop(username, BDdemo_new, verbose=False, norm=False, reports=False, user=F
                 console.print(Panel("time | perc. | response | joint.rate | data" , title="Designation"))
 
 ### Получить результаты и пройтись по массиву future.
+    li_time = [0]
     with progress:
         task0 = progress.add_task("", total=len(BDdemo_new.items())) if color == True else None
         for websites_names, param_websites in BDdemo_new.items():# БД:-скоррект.Сайт--> флаг,эмодзи,url, url_сайта, gray_lst, запрос-future.
@@ -417,8 +418,8 @@ def snoop(username, BDdemo_new, verbose=False, norm=False, reports=False, user=F
 ## Получить future и убедиться, что оно закончено.
             r, error_type, response_time = get_response(request_future=param_websites["request_future"], error_type=error_type,
                                                         websites_names=websites_names, print_found_only=print_found_only,
-                                                        verbose=verbose, color=color
-                                                        )
+                                                        verbose=verbose, color=color)
+
 ## Повторное соединение через новую сессию быстрее, чем через adapter - timeout*2=дольше.
             if norm == False and quickly == False and r is None and 'raised ConnectionError' in str(future):
                 #print(future)
@@ -770,22 +771,22 @@ def run():
                               help="\033[36mП\033[0mодключиться для поиска 'username' к обновляемой web_БД (Онлайн)/\
                               В demo version функция отключена"
                              )
-    search_group.add_argument("--site", "-s chess", action="append", metavar='', dest="site_list",  default=None,
+    search_group.add_argument("--site", "-s <site_name>", action="append", metavar='', dest="site_list",  default=None,
                               help="\033[36mУ\033[0mказать имя сайта из БД '--list-all'. Поиск 'username' на одном указанном ресурсе, \
                               допустимо использовать опцию '-s' несколько раз"
                              )
-    search_group.add_argument("--exclude", "-e RU", action="append", metavar='', dest="exclude_country",  default=None,
+    search_group.add_argument("--exclude", "-e <country_code>", action="append", metavar='', dest="exclude_country",  default=None,
                               help="\033[36mИ\033[0mсключить из поиска выбранный регион, \
-                              допустимо использовать опцию '-e' несколько раз, например, '-e ru -e wr' исключить из поиска Россию и Мир"
+                              допустимо использовать опцию '-e' несколько раз, например, '-e RU -e WR' исключить из поиска Россию и Мир"
                              )
-    search_group.add_argument("--one-level", "-o UA", action="append", metavar='', dest="one_level",  default=None,
+    search_group.add_argument("--one-level", "-o <country code>", action="append", metavar='', dest="one_level",  default=None,
                               help="\033[36mВ\033[0mлючить в поиск только выбранный регион, \
-                              допустимо использовать опцию '-o' несколько раз, например, '-o us -o ua' поиск по США и Украине"
+                              допустимо использовать опцию '-o' несколько раз, например, '-o US -o UA' поиск по США и Украине"
                              )
     search_group.add_argument("--country", "-c", action="store_true", dest="country", default=False,
                               help="\033[36mС\033[0mортировка 'печать/запись_результатов' по странам, а не по алфавиту"
                              )
-    search_group.add_argument("--time-out", "-t 9", action="store", metavar='', dest="timeout", type=timeout_check, default=5,
+    search_group.add_argument("--time-out", "-t <digit>", action="store", metavar='', dest="timeout", type=timeout_check, default=5,
                               help="\033[36mУ\033[0mстановить выделение макс.времени на ожидание ответа от сервера (секунды).\n"
                               "Влияет на продолжительность поиска. Влияет на 'Timeout ошибки:'"
                               "Вкл. эту опцию необходимо при медленном \
@@ -835,7 +836,7 @@ def run():
 
     args = parser.parse_args()
     logo(text="🛠 новая функциональность — в разработке") if args.quickly else ""
-#    print(args)
+    #print(args)
 ## Опции  '-cseo' несовместимы между собой.
     k=0
     for _ in bool(args.site_list), bool(args.country), bool(args.exclude_country), bool(args.one_level):
