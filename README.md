@@ -2,16 +2,15 @@ Snoop Project for Termux
 ========================
 
 ## Snoop Project один из самых перспективных OSINT-инструментов по поиску никнеймов.
-- [X] This is the most powerful software taking into account the CIS location.
+- [X] This is the most powerful software taking into account the CIS location.  
+• [English readme Snoop for Termux](https://github.com/snooppr/snoop/blob/snoop_termux/README.en.md "Please feel free to improve the translation of this page.")  
 
 <p align="center">  
   <img src="https://raw.githubusercontent.com/snooppr/snoop/master/images/snoopandroid.png" width="70%" />  
 </p>  
 
-Is your life slideshow? Ask Snoop.  
-Snoop project is developed without taking into account the opinions of the NSA and their friends,  
-that is, it is available to the average user.
-............................................................................  
+Ваша жизнь Слайд-шоу? Спросите снуп.  
+Snoop Project разработан без учета мнения АНБ и их приятелей, то есть доступен рядовому пользователю.  
 
 ## Самостоятельная сборка ПО из исходно кода  
 **Snoop for Android/Demo**  
@@ -19,7 +18,7 @@ that is, it is available to the average user.
   <img src="https://raw.githubusercontent.com/snooppr/snoop/master/images/Snoop_termux.plugins.png" width="90%" />  
 </p>  
 
-**Self-build software from source**
+**Self-build software from source**  
 **Native Installation**  
 
 Установить [Termux](https://f-droid.org/ru/packages/com.termux/ "F-Droid")  

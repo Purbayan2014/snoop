@@ -1,7 +1,7 @@
 Snoop Project for Termux
 ========================
 
-## Snoop Project один из самых перспективных OSINT-инструментов по поиску никнеймов.
+## Snoop Project is one of the most promising OSINT tools for finding nicknames.
 - [X] This is the most powerful software taking into account the CIS location.
 
 <p align="center">  
@@ -44,14 +44,14 @@ $ cd ~/snoop
 $ python3 -m pip install -r requirements.txt
 
 # To expand the terminal output in Termux (by default, 2k lines are displayed in the CLI),  
-for example, displaying the entire database of the option '--list all [1/2]'  
+for example, displaying the entire database of the option '--list-all [1/2]'  
 add the line 'terminal-transcript-rows=10000' to the file '~/.termux/termux.properties'  
 (the feature is available in Termux v0.114+).  
 Restart Termux. 
 
 # The user can also launch the Snoop Project on the snoop command from anywhere in the cli by creating an alias.  
 $ printf "alias snoop='cd && cd snoop && python snoop.py'" >> .bashrc  
-# The user can also run a quick check on the database of the site he is interested in, without using the 'list all' option, using the 'snoopcheck'command
+# The user can also run a quick check on the database of the site he is interested in, without using the 'list-all' option, using the 'snoopcheck'command
 $ alias snoopcheck='cd && cd snoop && printf 2 | python snoop.py --list-all | grep -i' >> .bashrc  
 # restart Termux. 
 ```
@@ -61,7 +61,6 @@ $ alias snoopcheck='cd && cd snoop && printf 2 | python snoop.py --list-all | gr
 
 
 ## Using
-**English version — of Snoop see release (available 'Snoop EN version').**
 ```
 Help
 
@@ -91,7 +90,7 @@ search arguments:
   --verbose, -v         When searching for 'username', print detailed
                         verbalization
   --base , -b <path>    Specify another database for search for 'username'
-                        (Local) / In demo version the function is disabled
+                        (Local)/In demo version the function is disabled
   --web-base, -w        Connect to search for 'username' to the updated web_DB
                         (Online)/In demo version the function is disabled
   --site , -s <site_name> 
@@ -137,11 +136,11 @@ search arguments:
                         from the snoop database is set for each site.
                         https://юзерагент.рф/
   --normal-mode, -N     Mode switch: SNOOPninja> normal mode> SNOOPninja. 
-                        By_default (GNU / Linux Full Version) on 
+                        By_default (GNU/Linux Full Version) on 
                         'SNOOPninja mode': search acceleration ~ 25pct,
                         RAM saving ~ 50pct, repeated 'flexible' connection on
                         failed resources. SNOOPninja mode is only effective for
-                        Snoop for GNU / Linux Full Version. The default
+                        Snoop for GNU/Linux Full Version. The default
                         (on Windows) is 'normal mode'. 
                         In Demo Version, the mode switch is deactivated
   --quick-mode , -q     Quiet search mode on. Intermediate
@@ -183,7 +182,7 @@ or ```python snoop.py --autoclean```
 
 ```
 # Update Snoop to test new software features:
-$ python3 snoop.py --update y #Требуется установка Git.
+$ python3 snoop.py --update y #requires a Git installation.
 ```
 
 **An example of searching Phone**  
