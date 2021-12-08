@@ -13,14 +13,13 @@ Snoop project is developed without taking into account the opinions of the NSA a
 that is, it is available to the average user.
 ............................................................................  
 
-**Самостоятельная сборка ПО из исходно кода**  
-**Self-build software from source**
-
-## Snoop for Android/Demo  
+## Самостоятельная сборка ПО из исходно кода  
+**Snoop for Android/Demo**  
 <p align="center">  
   <img src="https://raw.githubusercontent.com/snooppr/snoop/master/images/Snoop_termux.plugins.png" width="90%" />  
 </p>  
 
+**Self-build software from source**
 **Native Installation**  
 
 Установить [Termux](https://f-droid.org/ru/packages/com.termux/ "F-Droid")  
@@ -36,7 +35,7 @@ $ pip install --upgrade pip
 
 # Клонировать репозиторий
 $ git clone https://github.com/snooppr/snoop -b snoop_termux
-# (Если флешкa FAT (ни ext4), в таком случае,
+# (если флешкa FAT (ни ext4), в таком случае,
 # клонировать репозиторий только в ДОМАШНЮЮ директорию Termux)
 
 # Войти в рабочий каталог Snoop
@@ -125,9 +124,8 @@ search arguments:
                         ресурсы системы и ускоряет поиск
   --userlist , -u <path> 
                         Указать файл со списком user-ов.
-                        Пример_Linux: 'python3 snoop.py -u ~/users.txt'.
-                        Пример_Windows: 'python snoop.py -u
-                        c:\User\User\Documents\users.txt'
+                        Пример 'python snoop.py -u
+                        /storage/emulated/0/Download/listusers.txt'
   --save-page, -S       Сохранять найденные странички пользователей в
                         локальные файлы
   --cert-off, -C        Выкл проверку сертификатов на серверах. По
