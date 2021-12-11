@@ -2,6 +2,7 @@
 # Copyright (c) 2020 Snoop Project <snoopproject@protonmail.com>
 "Плагины Snoop Project/Черновик"
 
+import click
 import csv
 import itertools
 import json
@@ -17,6 +18,7 @@ import sys
 import threading
 import time
 import webbrowser
+import snoopbanner
 
 from collections import Counter
 from colorama import Fore, Style, init
@@ -31,14 +33,13 @@ from rich.style import Style as STL
 from urllib.parse import urlparse
 
 locale.setlocale(locale.LC_ALL, '')
+# раскраска
+init(autoreset=True)
+console = Console()
 
 head0 = {'User-Agent': 'Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/76.0.3809.100 Safari/537.36'}
 url = "https://freegeoip.app/json/"
 time_data = time.localtime()
-
-# раскраска
-init(autoreset=True)
-console = Console()
 
 def ravno():
     console.rule(characters = '=', style="cyan bold")
@@ -70,48 +71,6 @@ def Erf(hvostfile):
     print("\033[36mИли удалите из файла нечитаемые символы.")
     ravno()
     
-def donate():
-    print("")
-    console.print(Panel("""[cyan]
-╭donate/Buy:
-├──Яндекс.Деньги (yoomoney):: [white]4100111364257544[/white]
-├──Visa:: [white]4274320047338002[/white]
-├──PayPal:: [white]snoopproject@protonmail.com[/white]
-└──Bitcoin (только Donate)::[/cyan] [white]1Ae5uUrmUnTjRzYEJ1KkvEY51r4hDGgNd8[/white]
-
-[bold green]Если вас заинтересовала [red]Snoop Demo Version[/red], Вы можете официально приобрести 
-[cyan]Snoop Full Version[/cyan], поддержав развитие проекта[/bold green] [bold cyan]20$[/bold cyan] [bold green]или[/bold green] [bold cyan]1400р.[/bold cyan]
-[bold green]При пожертвовании/покупке в сообщении укажите информацию в таком порядке:[/bold green]
-
-    [cyan]"Пожертвование на развитие Snoop Project: 20$ ваш e-mail
-    Full Version for Windows RU или Full Version for Linux RU,
-    статус пользователя: Физ.лицо; ИП; Юр.лицо (если покупка ПО)"[/cyan]
-
-[bold green]В ближайшее время на email пользователя придёт чек и ссылка для скачивания
-Snoop Full Version готовой сборки то есть исполняемого файла, 
-для Windows — это 'snoop.exe', для GNU/Linux — 'snoop'.
-
-Snoop в исполняемом виде (бинарник) предоставляется по лицензии, с которой пользователь должен ознакомиться перед покупкой ПО.
-Лицензия (RU/EN) для Snoop Project в исполняемом виде находится в rar-архивах демо версий Snoop по ссылке:[/bold green]
-[cyan]https://github.com/snooppr/snoop/releases[/cyan][bold green], а так же лицензия доступна по команде '[/bold green][cyan]snoop -V[/cyan][bold green]' или '[/bold green][cyan]snoop.exe -V[/cyan][bold green]' у исполняемого файла.
-
-Если Snoop требуется вам для служебных или образовательных задач,
-напишите письмо на e-mail разработчика в свободной форме.
-Студентам по направлению ИБ/Криминалистика Snoop ПО Full Version может быть
-предоставлено на безвозмездной основе.
-
-Snoop Full Version: плагины без ограничений; 2200+ Websites; 
-поддержка и обновление Database Snoop.
-Подключение к Web_Database Snoop (online), которая расширяется/обновляется.[/bold green]
-[bold red]Ограничения Demo Version: Websites (Database Snoop сокращена в > 15 раз);
-отключены некоторые опции/плагины; необновляемая Database_Snoop.[/bold red]
-
-[bold green]Email:[/bold green] [cyan]snoopproject@protonmail.com[/cyan]
-[bold green]Исходный код:[/bold green] [cyan]https://github.com/snooppr/snoop[/cyan]""", title="[bold red]Demo: (Публичная оферта)", 
-border_style="bold blue"))# ,style="bold green"))
-    webbrowser.open("https://sobe.ru/na/snoop_project_2020")
-    print(Style.BRIGHT + Fore.RED + "Выход")
-    sys.exit()
 
 ## Модуль Yandex_parser
 def module3():
@@ -243,36 +202,7 @@ def module3():
 
 # Help
         elif Ya == "help":
-            print("""\033[32;1m└──[Справка]
-
-Однопользовательский режим\033[0m
-\033[32m* Логин — левая часть до символа '@', например, bobbimonov@ya.ru, логин
-'\033[36mbobbimonov\033[0m\033[32m'.
-* Публичная ссылка на Яндекс.Диск — это ссылка для скачивания/просмотра материалов, которую пользователь выложил в публичный доступ, например,
-'\033[36mhttps://yadi.sk/d/7C6Z9q_Ds1wXkw\033[0m\033[32m' или '\033[36mhttps://disk.yandex.ru/d/7C6Z9q_Ds1wXkw\033[0m\033[32m'.
-* Идентификатор — хэш, который указан в url на странице пользователя,
-например, в сервисе Я.Район: 'https://local.yandex.ru/users/tr6r2c8ea4tvdt3xmpy5atuwg0/' идентификатор — '\033[36mtr6r2c8ea4tvdt3xmpy5atuwg0\033[0m\033[32m'.
-Плагин Yandex_parser выдает меньше информации по идентификатор-у пользователя (в сравнении с другими методами), причина — fix уязвимости от Яндекса.
-
-По окончанию успешного поиска выводится отчёт в CLI, сохраняется в txt и открывается браузер с персональными страницами пользователя в сервисах Яндекс-а.
-
-\033[32;1mМногопользовательский режим\033[0m
-\033[32m* Файл с именами пользователей — файл (в кодировке UTF-8 с расширением .txt или без него), в котором записаны логины.
-Каждый логин в файле должен быть записан с новой строки, например:
-
-\033[36mbobbimonov
-username
-username2
-username3
-случайная строка\033[0m
-
-\033[32mПри использовании многопользовательского режима по окончанию поиска (быстро)
-открывается браузер с расширенным отчётом, в котором перечислены:
-логины пользователей; их имена; e-mail's и их персональные ссылки на сервисы Яндекса.
-
-Плагин генерирует, но не проверяет 'доступность' персональных страниц пользователей по причине: частая защита страниц Я.капчей.
-
-Все результаты сохраняются в '\033[36m~/snoop/results/plugins/Yandex_parser/*\033[0m\033[32m'\033[0m""")
+            snoopbanner.help_yandex_parser()
             helpend()
 
 # Указать login
@@ -319,7 +249,7 @@ username3
 # Указать файл с логинами
         elif Ya == '4':
             print("\033[31;1m└──В Demo version этот метод плагина недоступен\033[0m\n")
-            donate()
+            snoopbanner.donate()
         else:
             print(Style.BRIGHT + Fore.RED + "└──Неверный выбор" + Style.RESET_ALL)
             ravno()
@@ -399,45 +329,7 @@ def module1():
                 sys.exit(0)
 # Справка
             elif dipbaza == "help":
-                print("\033[32;1m└──Справка\033[0m\n")
-                print("""\033[32mРежим '\033[32;1mOnline поиск\033[0m\033[32m'. Модуль GEO_IP/domain от Snoop Project использует публичный api
-и создает статистическую и визуализированную информацию по ip/url/domain цели (массиву данных)
-    (ограничения: запросы ~15к/час, невысокая скорость обработки данных, отсутствие информации о провайдерах).
-Преимущества использования 'Online поиска':
-в качестве входных данных можно использовать не только ip-адреса, но и domain/url.
-Пример файла с данными (список.txt):
-
-\033[36m1.1.1.1
-2606:2800:220:1:248:1893:25c8:1946
-google.com
-https://example.org/fo/bar/7564
-случайная строка\033[0m
-
-\033[32mРежим '\033[32;1mOffline поиск\033[0m\033[32m'. Модуль GEO_IP/domain от Snoop Project использует специальные базы данных
-и создает статистическую и визуализированную информацию только по ip цели (массиву данных)
-    (базы данных доступны свободно от компании Maxmind).
-Преимущества использования 'Offline поиска': скорость (обработка тысяч ip без задержек),
-стабильность (отсутствие зависимости от интернет соединения и персональных настроек DNS/IPv6 пользователя),
-масштабный охват/покрытие (предоставляется информация об интернет-провайдерах).
-
-Режим '\033[32;1mOffline_тихий поиск\033[0m\033[32m':: Тот же режим, что и режим 'Offline', но не выводит на печать промежуточные таблицы с данными.
-Даёт прирост в производительности в ~4 раза.
-Пример файла с данными (список.txt):
-
-\033[36m8.8.8.8
-93.184.216.34
-2606:2800:220:1:248:1893:25c8:1946
-случайная строка\033[0m
-
-\033[32mSnoop довольно умён и способен определять и различать во входных данных: IPv4/v6/domain/url, вычищая ошибки и случайные строки.
-По окончанию обработки данных пользователю предоставляются:
-статистические отчеты в [txt/csv и визуализированные данные на карте OSM].
-
-Примеры для чего можно использовать модуль GEO_IP/domain от Snoop Project.
-Например, если у пользователя имеется список ip адресов от DDoS атаки,
-он может проанализировать откуда исходила  max/min атака и от кого (провайдеры).
-Решая квесты-CTF, где используются GPS/IPv4/v6.
-В конечном итоге юзать плагин в образовательных целях или из естественного любопытства (проверить любые ip-адреса и их принадлежность к провайдеру и местности).\033[0m""")
+                snoopbanner.geo_ip_domain()
                 helpend()
 
 # Оффлайн поиск
@@ -445,7 +337,7 @@ https://example.org/fo/bar/7564
             elif dipbaza == "2" or dipbaza == "3":
                 while True:
                     print("\033[31;1m└──В Demo version этот метод плагина недоступен\033[0m\n")
-                    donate()
+                    snoopbanner.donate()
                     break
 
                 break
@@ -453,7 +345,7 @@ https://example.org/fo/bar/7564
 # Онлайн поиск
             elif dipbaza == "1":
                 print("\033[31;1m└──В Demo version этот метод плагина недоступен\033[0m\n")
-                donate()
+                snoopbanner.donate()
                 break
 
 # Неверный выбор ключа при оффлайн/онлайн поиске. Выход
