@@ -5,6 +5,10 @@ import argparse
 import base64
 import csv
 import glob
+try:
+    import click
+except:
+    print("ВНИМАНИЕ! Обновите lib python:\ncd ~/snoop && python3 -m pip install -r requirements.txt")
 import json
 import locale
 import networktest
@@ -22,7 +26,7 @@ import webbrowser
 
 from collections import Counter
 from colorama import Fore, Style, init
-from concurrent.futures import ProcessPoolExecutor, ThreadPoolExecutor
+from concurrent.futures import ProcessPoolExecutor, ThreadPoolExecutor, as_completed
 from playsound import playsound
 from requests_futures.sessions import FuturesSession
 from rich.progress import (track,BarColumn,TimeRemainingColumn,SpinnerColumn,TimeElapsedColumn,Progress)
@@ -35,7 +39,7 @@ locale.setlocale(locale.LC_ALL, '')
 init(autoreset=True)
 console = Console()
 
-vers = 'v1.3.2C'
+vers = 'v1.3.2D'
 print (f"""\033[36m
   ___|                          
 \___ \  __ \   _ \   _ \  __ \  
@@ -180,12 +184,12 @@ def get_response(request_future, error_type, websites_names, print_found_only=Fa
             print_error(err1, "HTTP Error:", websites_names, verbose, color)
     except requests.exceptions.ConnectionError as err2:
         global censors
-        censors +=1
+        censors += 1
         if print_found_only==False:
             print_error(err2, "Ошибка соединения:", websites_names, verbose, color)
     except requests.exceptions.Timeout as err3:
         global censors_timeout
-        censors_timeout +=1
+        censors_timeout += 1
         if print_found_only==False:
             print_error(err3, "Timeout ошибка:", websites_names, verbose, color)
     except requests.exceptions.RequestException as err4:
@@ -267,15 +271,15 @@ def snoop(username, BDdemo_new, verbose=False, norm=False, reports=False, user=F
         sys.exit()
 
     global nick
-    nick = username
-## Создать много_поточный/процессный сеанс для всех запросов.
+    nick = username #username 2переменых (args/info).
+## Создать многопоточный/процессный сеанс для всех запросов.
     requests.packages.urllib3.disable_warnings() #блокировка предупреждений о сертификате.
     my_session = requests.Session()
     if cert == True:
         my_session.verify = False
         requests.packages.urllib3.disable_warnings()
 
-    if not sys.platform == 'win32':
+    if sys.platform != 'win32':
         if "arm" in platform.platform(aliased=True, terse=0) or "aarch64" in platform.platform(aliased=True, terse=0):
             session1 = ElapsedFuturesSession(executor=ThreadPoolExecutor(max_workers=10), session=my_session)
         else:
@@ -291,7 +295,7 @@ def snoop(username, BDdemo_new, verbose=False, norm=False, reports=False, user=F
     if norm == False:
         session3 = ElapsedFuturesSession(executor=ThreadPoolExecutor(max_workers=1), session=my_session)
 
-### Создание futures на все запросы. Это позволит распараллетить запросы с прерываниями.
+### Создание futures на все запросы. Это позволит распараллелить запросы с прерываниями.
     for websites_names, param_websites in BDdemo_new.items():
         results_site = {}
 
@@ -315,8 +319,8 @@ def snoop(username, BDdemo_new, verbose=False, norm=False, reports=False, user=F
         RH = random.choice(RandHead)
         headers = json.loads(RH.replace("'",'"'))
 
+## Переопределить/добавить любые дополнительные заголовки, необходимые для данного сайта из БД или cli.
         if "headers" in param_websites:
-## Переопределить/добавить любые дополнительные заголовки, необходимые для данного сайта.
             headers.update(param_websites["headers"])
         if headerS is not None:
             headers.update({"User-Agent":''.join(headerS)})
@@ -337,53 +341,50 @@ def snoop(username, BDdemo_new, verbose=False, norm=False, reports=False, user=F
             if param_websites.get("bad_site") == 1 and verbose == True and not print_found_only:
                 print_invalid("", websites_names, f"**Пропуск. Dynamic gray_list", color)
                 results_site["exists"] = "gray_list"
+            if param_websites.get("bad_site") == 1 and exclusionYES is None:
+                results_site["exists"] = "gray_list"
         else:
 ## URL пользователя на сайте (если он существует).
-            #global url
             url = param_websites["url"].format(username)
             results_site["url_user"] = url
             url_API = param_websites.get("urlProbe")
-            if url_API is None:
-## URL-адрес — является обычным, который видят люди в Интернете.
-                url_API = url
-            else:
-## Существует специальный URL (обычно о нем мы не догадываемся/api) для проверки существования отдельно юзера.
-                url_API = url_API.format(username)
+# Использование api/nickname
+            url_API = url if url_API is None else url_API.format(username)
 
-## Если нужен только статус кода, не загружать тело страницы, экономими память для status/redirect методов.
+## Если нужен только статус кода, не загружать тело страницы, экономим память для status/redirect методов.
             if reports == True or param_websites["errorTypе"] == 'message' or param_websites["errorTypе"] == 'response_url':
                 request_method = session1.get
             else:
                 request_method = session1.head
 
 ## Сайт перенаправляет запрос на другой URL.
+# Имя найдено. Запретить перенаправление чтобы захватить статус кода из первоначального url.
             if param_websites["errorTypе"] == "response_url" or param_websites["errorTypе"] == "redirection":
-## Имя найдено. Запретить перенаправление чтобы захватить статус кода из первоначального url.
                 allow_redirects = False
+# Разрешить любой редирект, который хочет сделать сайт и захватить тело и статус ответа..
             else:
-## Разрешить любой редирект, который хочет сделать сайт.
-## Окончательным результатом запроса будет то, что доступно.
                 allow_redirects = True
 
-## Отправить все запросы и сохранить future in data для последующего доступа.
+## Отправить параллельно все запросы и сохранить future in data для последующего доступа к хукам.
             future = request_method(url=url_API, headers=headers, allow_redirects=allow_redirects, timeout=timeout)
             param_websites["request_future"] = future
+            #d2.update({future:{k:v}})
 
-## Добавлять флаги/url-s в будущий-окончательный словарь с будущими всеми другими результатами.
+## Добавлять флаги/url-s/хуки в будущий-окончательный словарь с будущими всеми другими результатами.
         dic_snoop_full[websites_names] = results_site
 
+## Прогресс_описание.
     if verbose == False:
-# Прогресс.
         if sys.platform != 'win32':
             progress = Progress(TimeElapsedColumn(), SpinnerColumn(spinner_name=random.choice(["dots", "dots12"])),
             "[progress.percentage]{task.percentage:>1.0f}%", BarColumn(bar_width=None, complete_style='cyan', finished_style='cyan bold'),
             refresh_per_second = 3.0)#auto_refresh=False) #transient=True) #исчезает прогресс
         else:
             progress = Progress(TimeElapsedColumn(), "[progress.percentage]{task.percentage:>1.0f}%", BarColumn(bar_width=None,
-            complete_style='cyan', finished_style='cyan bold'), refresh_per_second = 3.0)#,auto_refresh=False)#transient=True) #исчезает прогресс
+            complete_style='cyan', finished_style='cyan bold'), refresh_per_second = 3.0)#,auto_refresh=False)
     else:
         progress = Progress(TimeElapsedColumn(), "[progress.percentage]{task.percentage:>1.0f}%", auto_refresh=False)#,refresh_per_second = 3.0)#
-# Панель вербализации.
+## Панель вербализации.
         if not "arm" in platform.platform(aliased=True, terse=0) and not "aarch64" in platform.platform(aliased=True, terse=0):
             if color == True:
                 console.print(Panel("[yellow]об.время[/yellow] | [magenta]об.% выполн.[/magenta] | [bold cyan]отклик сайта[/bold cyan] " + \
@@ -399,13 +400,13 @@ def snoop(username, BDdemo_new, verbose=False, norm=False, reports=False, user=F
             else:
                 console.print(Panel("time | perc. | response | joint.rate | data" , title="Designation"))
 
-### Получить результаты и пройтись по массиву future.
+### Пройтись по массиву future и получить результаты.
     li_time = [0]
     with progress:
         task0 = progress.add_task("", total=len(BDdemo_new.items())) if color == True else None
         for websites_names, param_websites in BDdemo_new.items():# БД:-скоррект.Сайт--> флаг,эмодзи,url, url_сайта, gray_lst, запрос-future.
             progress.update(task0, advance=1, refresh=True) if color == True else "" #\nprogress.refresh()
-## Получить другую информацию сайта снова.
+## Получить другую информацию сайта, снова.
             url = dic_snoop_full.get(websites_names).get("url_user")
             country_emojis = dic_snoop_full.get(websites_names).get("flagcountry")
             country_code = dic_snoop_full.get(websites_names).get("flagcountryklas")
@@ -415,12 +416,12 @@ def snoop(username, BDdemo_new, verbose=False, norm=False, reports=False, user=F
                 continue
 ## Получить ожидаемый тип данных 4 методов.
             error_type = param_websites["errorTypе"]
-## Получить future и убедиться, что оно закончено.
+## Получить результаты future.
             r, error_type, response_time = get_response(request_future=param_websites["request_future"], error_type=error_type,
                                                         websites_names=websites_names, print_found_only=print_found_only,
                                                         verbose=verbose, color=color)
 
-## Повторное соединение через новую сессию быстрее, чем через adapter - timeout*2=дольше.
+## Повторное сбойное соединение через новую сессию быстрее, чем через adapter - timeout*2=дольше.
             if norm == False and quickly == False and r is None and 'raised ConnectionError' in str(future):
                 #print(future)
                 head_duble = {'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
@@ -510,7 +511,7 @@ def snoop(username, BDdemo_new, verbose=False, norm=False, reports=False, user=F
                         print_not_found(websites_names, response_time, verbose, color)
                     exists = "увы"
 
-## Если все 4 метода не сработали, например, из-за ошибки доступа (красный) или из-за каптчи (желтый).
+## Если все 4 метода не сработали, например, из-за ошибки доступа (красный) или из-за капчи (желтый).
             else:
                 print_invalid("", websites_names, "*ПРОПУСК", color) if not print_found_only else ""
                 exists = "блок"
@@ -568,7 +569,7 @@ def snoop(username, BDdemo_new, verbose=False, norm=False, reports=False, user=F
                     console.print(f" [*{site_time} s T] >>", f"[*{ello_time} s t]", f"[*{Ssession_size}]", highlight=False)
                     console.rule(style="color")
 
-## Служебная информация для CSV.
+## Служебная информация для CSV (2-й словарь, чтобы не вызывать ошибку длины 1го при итерациях).
             if dif_time > 2.7 and dif_time != ello_time:
                 dic_snoop_full.get(websites_names)['response_time_site_ms'] = str(dif_time)
             else:
@@ -700,7 +701,15 @@ Snoop Full Version: плагины без ограничений; 2200+ Websites
 [bold green]Email:[/bold green] [cyan]snoopproject@protonmail.com[/cyan]
 [bold green]Исходный код:[/bold green] [cyan]https://github.com/snooppr/snoop[/cyan]""", title="[bold red]Demo: (Публичная оферта)",
 border_style="bold blue"))# ,style="bold green"))
-    webbrowser.open("https://sobe.ru/na/snoop_project_2020")
+    try:
+        if not "arm" in platform.platform(aliased=True, terse=0) and not "aarch64" in platform.platform(aliased=True, terse=0):
+            webbrowser.open("https://sobe.ru/na/snoop_project_2020")
+        else:
+            click.pause("\033[36m\nНажмите любую клавишу для открытия web browser\033[0m\n")
+            click.launch(f"https://sobe.ru/na/snoop_project_2020")
+    except:
+        print("\n\033[31;1mНе удалось открыть браузер\033[0m")
+
     print(Style.BRIGHT + Fore.RED + "Выход")
     sys.exit()
 
@@ -762,7 +771,7 @@ def run():
                               Ник, содержащий в своем имени пробел, заключается в кавычки"
                              )
     search_group.add_argument("--verbose", "-v", action="store_true", dest="verbose", default=False,
-                              help="\033[36mВ\033[0mо время поиска 'username' выводить на печать подробную вербализацию"
+                              help="\033[36mВ\033[0mо время поиска 'nickname' выводить на печать подробную вербализацию"
                              )
     search_group.add_argument("--base", "-b <path>", dest="json_file", default="BDdemo", metavar='',
                               help="\033[36mУ\033[0mказать для поиска 'username' другую БД (Локально)/В demo version функция отключена"
@@ -788,8 +797,8 @@ def run():
                              )
     search_group.add_argument("--time-out", "-t <digit>", action="store", metavar='', dest="timeout", type=timeout_check, default=5,
                               help="\033[36mУ\033[0mстановить выделение макс.времени на ожидание ответа от сервера (секунды).\n"
-                              "Влияет на продолжительность поиска. Влияет на 'Timeout ошибки:'"
-                              "Вкл. эту опцию необходимо при медленном \
+                              "Влияет на продолжительность поиска. Влияет на 'Timeout ошибки'."
+                              " Вкл. эту опцию необходимо при медленном \
                               интернет соединении, чтобы избежать длительных зависаний \
                               при неполадках в сети (по умолчанию значение выставлено 5с)"
                              )
@@ -835,8 +844,8 @@ def run():
                              )
 
     args = parser.parse_args()
-    logo(text="🛠 новая функциональность — в разработке") if args.quickly else ""
-    #print(args)
+    logo(text="🛠  [-q] новая функциональность — в разработке") if args.quickly else ""
+#    print(args)
 ## Опции  '-cseo' несовместимы между собой.
     k=0
     for _ in bool(args.site_list), bool(args.country), bool(args.exclude_country), bool(args.one_level):
@@ -901,7 +910,7 @@ IPv4/v6; GEO-координаты/ссылки; локации; провайде
 \033[32;1m========================
 | Плагин Yandex_parser |
 ========================\033[0m\n
-\033[32mПлагин позволяет получить информацию о пользователе/пользователях сервисов Яндекс:
+\033[32mПлагин позволяет получить информацию о пользователях Яндекс-сервисов:
 Я_Отзывы; Я_Кью; Я_Маркет; Я_Музыка; Я_Дзен; Я_Диск; E-mail, Name.
 И связать полученные данные между собой с высокой скоростью и масштабно.
 Предназначение — OSINT.
@@ -1098,9 +1107,9 @@ IPv4/v6; GEO-координаты/ссылки; локации; провайде
         print("\n\033[37m\033[44m{}".format("Функция '-w' доступна только пользователям Snoop Full Version..."))
         donate()
 ## Работа с базой.
-# Проверить, существует ли альтернативная база данных, иначе demo.
+# опция '-b'. Проверить, существует ли альтернативная база данных, иначе demo.
     if not os.path.exists(str(args.json_file)):
-        print(f"\033[31;1mОшибка! Неверно указан путь к файлу: '{str(args.json_file)}'.\033[0m")
+        print(f"\n\033[31;1mОшибка! Неверно указан путь к файлу: '{str(args.json_file)}'.\033[0m")
         sys.exit()
 
 ## Опция  '-c'. Сортировка по странам.
@@ -1193,9 +1202,8 @@ IPv4/v6; GEO-координаты/ссылки; локации; провайде
 ## Опция '-v'.
     if args.verbose and bool(args.username):
         print(Fore.CYAN + "[+] активирована опция '-v': «подробная вербализация в CLI»\n")
-        with console.status("[cyan]Ожидайте, идёт самотестирование сети..."):
-            networktest.nettest()
-            console.log("[cyan]--> тест сети")
+        networktest.nettest()
+
 ## Опция  '-w' не активна.
     try:
         if args.web == False:
@@ -1404,18 +1412,20 @@ function sortList() {
 
 ## Музыка.
         try:
-            if args.no_func==False:
-                playsound('end.wav')
+            if args.no_func==False: playsound('end.wav')
         except:
             pass
 
 ## Открывать/нет браузер с результатами поиска.
         if args.no_func==False and exists_counter >= 1:
-            if not "arm" in platform.platform(aliased=True, terse=0) and not "aarch64" in platform.platform(aliased=True, terse=0):
-                try:
+            try:
+                if not "arm" in platform.platform(aliased=True, terse=0) and not "aarch64" in platform.platform(aliased=True, terse=0):
                     webbrowser.open(f"file://{dirpath}/results/nicknames/html/{username}.html")
-                except:
-                    pass
+                else:
+                    click.pause("\033[36m\nНажмите любую клавишу для открытия результатов во внешнем браузере\033[0m")
+                    click.launch(f"file://{dirpath}/results/nicknames/html/{username}.html")
+            except:
+                print("\n\033[31;1mНе удалось открыть браузер\033[0m")
 ## поиск по выбранным пользователям.
     starts(args.username) if args.user==False else starts(userlists)
 ## Arbeiten...
