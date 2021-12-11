@@ -8,7 +8,7 @@ import glob
 try:
     import click
 except:
-    print("ВНИМАНИЕ! Обновите lib python:\ncd ~/snoop && python3 -m pip install -r requirements.txt")
+    print("\n\nВНИМАНИЕ! Обновите lib python:\ncd ~/snoop && python3 -m pip install -r requirements.txt\n\n")
 import json
 import locale
 import networktest
@@ -705,7 +705,7 @@ border_style="bold blue"))# ,style="bold green"))
         if not "arm" in platform.platform(aliased=True, terse=0) and not "aarch64" in platform.platform(aliased=True, terse=0):
             webbrowser.open("https://sobe.ru/na/snoop_project_2020")
         else:
-            click.pause("\033[36m\nНажмите любую клавишу для открытия web browser\033[0m\n")
+            click.pause(Style.DIM + Fore.CYAN + "\nНажмите любую клавишу для открытия web browser")
             click.launch(f"https://sobe.ru/na/snoop_project_2020")
     except:
         print("\n\033[31;1mНе удалось открыть браузер\033[0m")
@@ -1422,7 +1422,7 @@ function sortList() {
                 if not "arm" in platform.platform(aliased=True, terse=0) and not "aarch64" in platform.platform(aliased=True, terse=0):
                     webbrowser.open(f"file://{dirpath}/results/nicknames/html/{username}.html")
                 else:
-                    click.pause("\033[36m\nНажмите любую клавишу для открытия результатов во внешнем браузере\033[0m")
+                    click.pause(Style.DIM + Fore.CYAN + "\nНажмите любую клавишу для открытия результатов во внешнем браузере")
                     click.launch(f"file://{dirpath}/results/nicknames/html/{username}.html")
             except:
                 print("\n\033[31;1mНе удалось открыть браузер\033[0m")
