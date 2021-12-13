@@ -189,5 +189,5 @@ $ python3 snoop.py --update y #Требуется установка Git.
 
 **An example snoop for android**  
 <p align="center">  
-  <img src="https://raw.githubusercontent.com/snooppr/snoop/master/images/Android%20snoop_run.gif" width="100%" />  
+  <img src="https://raw.githubusercontent.com/snooppr/snoop/master/images/Android%20snoop_run.gif" width="40%" />  
 </p>  
