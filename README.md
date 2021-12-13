@@ -187,7 +187,7 @@ csv открывать в *office, разделитель полей **запя�
 $ python3 snoop.py --update y #Требуется установка Git.
 ```
 
-**An example of searching Phone**  
+**An example snoop for android**  
 <p align="center">  
-  <img src="https://raw.githubusercontent.com/snooppr/snoop/master/images/Android%20snoop_run.png" width="70%" />  
+  <img src="https://raw.githubusercontent.com/snooppr/snoop/master/images/Android%20snoop_run.gif" width="100%" />  
 </p>  
