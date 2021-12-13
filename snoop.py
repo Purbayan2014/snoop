@@ -1445,5 +1445,7 @@ if __name__ == '__main__':
         run()
     except KeyboardInterrupt:
         console.print(f"\n[bold red]Останов [italic](высвобождение ресурсов, ждите...)")
-        sys.exit()  #неспешное завершение с очисткой процессов в т.ч.
-        #os._exit(0)  #немедленное завершение, расплата блок-ОЗУ. Нет очистки ProcessPool, в full-version критично
+        if "arm" not in platform.platform(aliased=True, terse=0) or "aarch64" not in platform.platform(aliased=True, terse=0):
+            sys.exit()  #неспешное завершение с очисткой процессов в т.ч.
+        else:
+            os._exit(0)  #немедленное завершение, расплата блок-ОЗУ. Нет очистки ProcessPool, в full-version критично
