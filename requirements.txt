@@ -2,9 +2,9 @@ beautifulsoup4==4.9.1
 certifi>=2021.10.8
 click==8.0.3
 colorama==0.4.4
-lxml==4.6.5
+lxml>=4.6.5
 playsound==1.2.2
-requests==2.25.1
+requests>=2.25.1
 requests-futures==1.0.0
 rich==10.15.2
 soupsieve==2.1
