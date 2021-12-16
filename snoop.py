@@ -39,6 +39,11 @@ except ModuleNotFoundError:
 import snoopbanner
 import snoopplugins
 
+if int(platform.python_version_tuple( )[1]) >= 8:
+    from importlib.metadata import version as version_lib
+    python3_8 = True
+else:
+    python3_8 = False
 
 Android = True if "arm" in platform.platform(aliased=True, terse=0) or "aarch64" in platform.platform(aliased=True, terse=0) else False
 
