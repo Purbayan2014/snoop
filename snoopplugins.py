@@ -78,6 +78,7 @@ def Erf(hvostfile):
           f"\033[36mПо умолчанию, например, блокнот в OS Windows сохраняет текст в кодировке — ANSI.\033[0m\n" + \
           f"\033[36mОткройте ваш файл '{hvostfile}' и измените кодировку [файл ---> сохранить как ---> utf-8].\n" + \
           f"\033[36mИли удалите из файла нечитаемые спецсимволы.")
+    ravno()
 
 
 ## Модуль Yandex_parser.
@@ -86,16 +87,8 @@ def module3():
         listlogin = []
         dicYa = {}
 
-        def parsingYa(login):
-# Запись в txt.
-            if Ya == '4':
-                file_txt = open(dirresults + "/results/plugins/Yandex_parser/" + str(hvostfile) + '_' + \
-                                time.strftime("%d_%m_%Y_%H_%M_%S", time_date) + ".txt", "w", encoding="utf-8")
-            #raise Exception("")
-            else:
-                file_txt = open(dirresults + "/results/plugins/Yandex_parser/" + str(login) + ".txt", "w", encoding="utf-8")
-
 # Парсинг.
+        def parsingYa(login):
             for login in listlogin:
                 urlYa = f'https://yandex.ru/collections/api/users/{login}/'
                 try:
@@ -120,7 +113,7 @@ def module3():
                     #print(rY.text)
                     try:
                         rdict = json.loads(rY.text)
-                        if rdict.get('title') == "404 Not Found":
+                        if rdict.get('title') == "404 Not Found":  #равно
                             raise Exception("")
                     except Exception:
                         rdict = {}
@@ -136,7 +129,6 @@ def module3():
                             print(Style.BRIGHT + Fore.RED + "\nНе сработало")
                             console.rule(characters="=", style="cyan bold\n")
                         else:
-                            wZ1bad.append(str(login))
                             continue
                         continue
                     else:
@@ -171,8 +163,6 @@ def module3():
 
                         yalist = [avatar_html, otzyv, market, music, dzen, qu]
 
-                        file_txt.write(f"{login} | {email} | {name}\n{avatar_cli}\n{otzyv}\n{market}\n{music}\n{dzen}\n{qu}\n\n")
-
                     for webopen in yalist:
                         if webopen == music and Ya == '3':
                             continue
@@ -183,16 +173,6 @@ def module3():
                                 webbrowser.open(webopen)
             ravno()
             azS.clear()
-
-# сохранение в html.
-            if Ya == '4':
-# запись в txt концовка.
-                file_txt.write(f"\nНеобработанные данные из файла '{hvostfile}' ({len(wZ1bad)}):\n")
-                for badsites in wZ1bad:
-                    file_txt.write(f"{badsites}\n")
-                file_txt.write(f"\nОбновлено: " + time.strftime("%d/%m/%Y_%H:%M:%S", time_date) + ".")
-                file_txt.close()
-
 
         print("\n\033[36m[\033[0m\033[32;1m1\033[0m\033[36m] --> Указать логин пользователя\n" + \
               "[\033[0m\033[32;1m2\033[0m\033[36m] --> Указать публичную ссылку на Яндекс.Диск\n" + \
@@ -215,8 +195,8 @@ def module3():
 
 # Указать login.
         elif Ya == '1':
-            print("\033[36m└──Введите username/login разыскиваемого пользователя, например,\033[0m\033[32;1m bobbimonov\033[0m\n")
-            login = input()
+            print("\033[36m└──Введите login/email разыскиваемого пользователя, например,\033[0m\033[32;1m bobbimonov\033[0m\n")
+            login = console.input("[cyan]login/email --->  [/cyan]")
             listlogin.append(login)
 
             parsingYa(login)
@@ -224,7 +204,7 @@ def module3():
 # Указать ссылку на Я.Диск.
         elif Ya == '2':
             print("\033[36m└──Введите публичную ссылку на Яндекс.Диск, например,\033[0m\033[32;1m https://yadi.sk/d/7C6Z9q_Ds1wXkw\033[0m\n")
-            urlYD = input()
+            urlYD = console.input("[cyan]url --->  [/cyan]")
 
             try:
                 r2 = my_session.get(urlYD, headers=head0, timeout=3)
@@ -245,7 +225,7 @@ def module3():
 # Указать идентиффикатор Яндекс пользователя.
         elif Ya == '3':
             print("\033[36m└──Введите идентификатор пользователя Яндекс, например,\033[0m\033[32;1m tr6r2c8ea4tvdt3xmpy5atuwg0\033[0m\n")
-            login = input()
+            login = console.input("[cyan]hash --->  [/cyan]")
             listlogin.append(login)
 
             if len(login) != 26:
@@ -306,12 +286,15 @@ def module1():
 
 # Выбор поиска одиночный или '-f'.
     ravno()
-    print("\n\033[36mВведите домен (пример:\033[0m \033[32;1mexample.com\033[0m\033[36m), или IPv4/IPv6 (пример:\033[0m \033[32;1m8.8.8.8\033[0m\033[36m),\n\
-или url (пример: \033[32;1mhttps://example.com/1/2/3/foo\033[0m\033[36m), \n\
-или укажите файл_с данными, выбрав ключ (пример:\033[0m \033[32;1m--file\033[0m\033[36m или\033[0m \033[32;1m-f\033[0m\033[36m)\n\
-[\033[0m\033[32;1m-f\033[0m\033[36m] --> обработатка файла данных\n\
-[\033[0m\033[32;1menter\033[0m\033[36m] --> информация о своем GEO_IP\n\
-[\033[0m\033[31;1mq\033[0m\033[36m] --> Выход")
+    print("\n\033[36mВведите домен (пример:\033[0m \033[32;1mexample.com\033[0m\033[36m), или IPv4/IPv6 (пример:\033[0m" + \
+          "\033[32;1m8.8.8.8\033[0m\033[36m),\n" + \
+          "или url (пример: \033[32;1mhttps://example.com/1/2/3/foo\033[0m\033[36m), \n" + \
+          "или укажите файл с данными, выбрав ключ (пример:\033[0m \033[32;1m--file\033[0m\033[36m или\033[0m " +\
+          "\033[32;1m-f\033[0m\033[36m)\n" + \
+          "[\033[0m\033[32;1m-f\033[0m\033[36m] --> обработатка файла данных\n" + \
+          "[\033[0m\033[32;1menter\033[0m\033[36m] --> информация о своем GEO_IP\n" + \
+          "[\033[0m\033[31;1mq\033[0m\033[36m] --> Выход")
+
     dip = input("\n")
 
 # выход.
