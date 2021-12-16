@@ -37,7 +37,7 @@ import snoopbanner
 locale.setlocale(locale.LC_ALL, '')
 init(autoreset=True)
 console = Console()
-time_data = time.localtime()
+time_date = time.localtime()
 head0 = {'User-Agent': 'Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/76.0.3809.100 Safari/537.36'}
 url = "https://freegeoip.app/json/"
 
@@ -90,7 +90,7 @@ def module3():
 # Запись в txt.
             if Ya == '4':
                 file_txt = open(dirresults + "/results/plugins/Yandex_parser/" + str(hvostfile) + '_' + \
-                                time.strftime("%d_%m_%Y_%H_%M_%S", time_data) + ".txt", "w", encoding="utf-8")
+                                time.strftime("%d_%m_%Y_%H_%M_%S", time_date) + ".txt", "w", encoding="utf-8")
             #raise Exception("")
             else:
                 file_txt = open(dirresults + "/results/plugins/Yandex_parser/" + str(login) + ".txt", "w", encoding="utf-8")
@@ -190,7 +190,7 @@ def module3():
                 file_txt.write(f"\nНеобработанные данные из файла '{hvostfile}' ({len(wZ1bad)}):\n")
                 for badsites in wZ1bad:
                     file_txt.write(f"{badsites}\n")
-                file_txt.write(f"\nОбновлено: " + time.strftime("%d/%m/%Y_%H:%M:%S", time_data) + ".")
+                file_txt.write(f"\nОбновлено: " + time.strftime("%d/%m/%Y_%H:%M:%S", time_date) + ".")
                 file_txt.close()
 
 
