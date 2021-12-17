@@ -159,7 +159,7 @@ def module3():
                         print("\033[32;1mЯ.Музыка:\033[0m", music)
                         print("\033[32;1mЯ.Дзен:\033[0m", dzen)
                         print("\033[32;1mЯ.Кью:\033[0m", qu)
-                        print("\033[32;1mAvatar:\033[0m", avatar_cli)
+                        print("\033[32;1mЯ.Avatar:\033[0m", avatar_cli)
 
                         yalist = [avatar_html, otzyv, market, music, dzen, qu]
 
@@ -236,7 +236,7 @@ def module3():
 
 # Указать файл с логинами.
         elif Ya == '4':
-            print("\033[31;1m└──В Demo version этот метод плагина недоступен\033[0m\n")
+            print("\033[31;1m└──В demo version этот метод плагина недоступен\033[0m\n")
             snoopbanner.donate()
         else:
             print(Style.BRIGHT + Fore.RED + "└──Неверный выбор" + Style.RESET_ALL)
@@ -328,7 +328,7 @@ def module1():
 # Открываем GeoCity.
             elif dipbaza == "2" or dipbaza == "3":
                 while True:
-                    print("\033[31;1m└──В Demo version этот метод плагина недоступен\033[0m\n")
+                    print("\033[31;1m└──В demo version этот метод плагина недоступен\033[0m\n")
                     snoopbanner.donate()
                     break
 
@@ -336,7 +336,7 @@ def module1():
 
 # Онлайн поиск.
             elif dipbaza == "1":
-                print("\033[31;1m└──В Demo version этот метод плагина недоступен\033[0m\n")
+                print("\033[31;1m└──В demo version этот метод плагина недоступен\033[0m\n")
                 snoopbanner.donate()
                 break
 
