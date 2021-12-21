@@ -43,7 +43,7 @@ $ cd ~/snoop
 $ python3 -m pip install -r requirements.txt
 
 # Чтобы расширить вывод терминала в Termux (по умолчанию 2к строк отображение в CLI), например, отображение всей БД опции '--list-all [1/2]'  
-добавить строку 'terminal-transcript-rows=10000' в файл '~/.termux/termux.properties' (фича доступна в Termux v0.114+). 
+добавить строку 'terminal-transcript-rows=10000' в файл '~/.termux/termux.properties' (крайне полезная опция доступна в Termux v0.114+). 
 Перезапустить Termux.  
 
 # Пользователь также может запустить snoop по команде 'snoop' из любого места в CLI, создав alias.  
@@ -71,7 +71,7 @@ service arguments:
   --list-all, -l        Вывести на печать детальную информацию о базе
                         данных Snoop
   --donate, -d          Пожертвовать на развитие Snoop Project-а,
-                        получить/приобрести Snoop Full Version
+                        получить/приобрести Snoop full version
   --autoclean, -a       Удалить все отчеты, очистить место
   --update, -U          Обновить Snoop
 
@@ -105,7 +105,7 @@ search arguments:
                         Влючить в поиск только выбранный регион,
                         допустимо использовать опцию '-o' несколько раз,
                         например, '-o US -o UA' поиск по США и Украине
-  --country, -c         Сортировка 'печать/запись_результатов' по
+  --country-sort, -c    Сортировка 'печать/запись_результатов' по
                         странам, а не по алфавиту
   --time-out , -t <digit> 
                         Установить выделение макс.времени на ожидание
@@ -139,12 +139,12 @@ search arguments:
                         https://юзерагент.рф/
   --normal-mode, -N     Переключатель режимов: SNOOPninja >
                         нормальный режим > SNOOPninja. По_умолчанию (GNU/Linux
-                        Full Version) вкл 'режим SNOOPninja': ускорение поиска
+                        full version) вкл 'режим SNOOPninja': ускорение поиска
                         ~25pct, экономия ОЗУ ~50pct, повторное 'гибкое'
                         соединение на сбойных ресурсах. Режим SNOOPninja
-                        эффективен только для Snoop for GNU/Linux Full
-                        Version. По_умолчанию (в Windows) вкл 'нормальный
-                        режим'. В Demo Version переключатель режимов
+                        эффективен только для Snoop for GNU/Linux full
+                        version. По_умолчанию (в Windows) вкл 'нормальный
+                        режим'. В demo version переключатель режимов
                         деактивирован
   --quick-mode , -q     Вкл тихий режим поиска. Промежуточные
                         результаты не выводятся на печать. Повторные гибкие
