@@ -1074,7 +1074,6 @@ def run():
 # Действие не выбрано '--list-all'.
         else:
             print(Style.BRIGHT + Fore.RED + "└──Извините, но вы не выбрали действие [1/2/3]\n\nВыход")
-            sys.exit()
         sys.exit()
 
 
@@ -1138,13 +1137,6 @@ def run():
         if bool(userlists) is False:
             sys.exit()
 
-## Ник не задан или противоречие опций.
-    if bool(args.username) is False and bool(args.user) is False:
-        snoopbanner.logo(text="\nпараметры либо nickname(s) не задан(ы)")
-    if bool(args.username) is True and bool(args.user) is True:
-        print("\n\033[31;1mВыберите для поиска nickname(s) из файла или задайте в cli,\n" + \
-              "но не совместное использование nickname(s): из файла и cli.\n\nВыход")
-        sys.exit()
 
 ## Проверка остальных (в т.ч. повтор) опций.
 ## Опция '--update y' обновление Snoop.
@@ -1248,6 +1240,15 @@ def run():
               str(diff_list).strip('[]') + Style.RESET_ALL + Fore.CYAN + "\n" + \
               "    допустимо использовать опцию '-o' несколько раз\n" + \
               "    [опция '-o'] несовместима с [опциями '-s', '-c', 'e']")
+
+
+## Ник не задан или противоречие опций.
+    if bool(args.username) is False and bool(args.user) is False:
+        snoopbanner.logo(text="\nпараметры либо nickname(s) не задан(ы)")
+    if bool(args.username) is True and bool(args.user) is True:
+        print("\n\033[31;1mВыберите для поиска nickname(s) из файла или задайте в cli,\n" + \
+              "но не совместное использование nickname(s): из файла и cli.\n\nВыход")
+        sys.exit()
 
 
 ## Опция '-v'.
